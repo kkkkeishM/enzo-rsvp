@@ -23,7 +23,12 @@ export default function Home() {
     <>
       <Wipe phase={wipe} />
       {screen === 'envelope' && <Envelope onOpened={() => goTo('cover')} />}
-      {screen === 'cover' && <Cover onEnter={() => goTo('invite')} />}
+      {screen === "cover" && (
+          <Cover
+            onEnter={() => goTo("invite")}
+            onBack={() => goTo("envelope")}
+          />
+        )}
       {screen === 'invite' && <Invitation onBack={() => goTo('cover')} />}
     </>
   );

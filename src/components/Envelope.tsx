@@ -1,7 +1,7 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
-import RaceCar from "./RaceCar";
-import Image from "next/image"
+import { useEffect, useRef, useState, type CSSProperties } from "react";
+import Image from "next/image";
+
 
 export default function Envelope({ onOpened }: { onOpened: () => void }) {
   const [open, setOpen] = useState(false);
@@ -35,21 +35,30 @@ export default function Envelope({ onOpened }: { onOpened: () => void }) {
   return (
     <main className="env-screen" onPointerMove={handleMove} onPointerLeave={handleLeave}>
       <div className={`env${open ? " open" : ""}${present ? " present" : ""}`}>
+
+        {/* TITLE: first child of .env, so it sits above the envelope */}
+        <div className="env-head">
+          <Image className="env-flags" src="/flags.png" alt="" width={700} height={473} priority />
+          <h1 className="env-title">You’re invited to</h1>
+        </div>
+
         <div className="env-tilt" ref={tiltRef}>
           <div className="env-stage">
             <div className="env-back" />
 
             <div className="env-card" aria-hidden="true">
-            <i />
-            <b>Enzo’s 1st Birthday Race Day</b>
-            <Image
+              <i />
+              <b>Enzo's 1st Birthday</b>
+              <b> Race Day</b>
+              <Image
                 className="env-tires"
                 src="/rolling_lightyear_tires.gif"
                 alt=""
                 width={1366}
                 height={727}
                 unoptimized
-            />
+                loading="eager"
+              />
             </div>
 
             <div className="env-front" aria-hidden="true">
@@ -66,13 +75,34 @@ export default function Envelope({ onOpened }: { onOpened: () => void }) {
             </svg>
 
             <div className="env-flap" aria-hidden="true">
-              <span className="flap-t">You’re</span>
-              <span className="flap-t">invited</span>
-
-              <span className="flap-t">to</span>
+              <i className="ff" />
+              <i className="fb" />
             </div>
 
-            <RaceCar className="env-car" />
+            <div className="env-car" aria-hidden="true">
+              <Image
+                className="env-car-img"
+                src="/car-bounce.gif"
+                alt=""
+                width={651}
+                height={231}
+                unoptimized
+                priority
+              />
+              {[0, 1, 2, 3, 4, 5].map((i) => (
+                <span
+                  key={i}
+                  className="puff"
+                  style={
+                    {
+                      "--n": i,
+                      "--px": i % 2 ? "64%" : "59.5%",
+                      "--py": i % 2 ? "82%" : "85%",
+                    } as CSSProperties
+                  }
+                />
+              ))}
+            </div>
 
             <button className="env-btn" type="button" onClick={handleOpen} aria-label="Open your invitation">
               <svg viewBox="0 0 100 100" aria-hidden="true">
