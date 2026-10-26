@@ -35,10 +35,8 @@ export default function Invitation({ onBack }: { onBack: () => void }) {
   });
 
   return (
-    <main
-      className="invite-screen"
-    >
-      <div className="slides" style={{ transform: `translateX(-${i * 100}%)` }}>
+    <main className="invite-screen">
+      <div className="slides">
         {/* Slide 1: welcome + schedule */}
         <section {...sp(0)}>
           <div className="slide-body combo">
@@ -68,11 +66,11 @@ export default function Invitation({ onBack }: { onBack: () => void }) {
             <div className="card">
               <div className="route" aria-hidden="true" />
               <p className="venue-text">
-                  <span className="venue-name">{EVENT.venue}</span>
-                  <br />
-                  <span className="venue-address">{EVENT.address}</span>
-                </p>
-                <a className="link" href={mapsLink(EVENT.address)} target="_blank" rel="noopener noreferrer">
+                <span className="venue-name">{EVENT.venue}</span>
+                <br />
+                <span className="venue-address">{EVENT.address}</span>
+              </p>
+              <a className="link" href={mapsLink(EVENT.address)} target="_blank" rel="noopener noreferrer">
                 Get directions
               </a>
             </div>

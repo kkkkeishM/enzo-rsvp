@@ -268,12 +268,13 @@ a {
 .route::before{content:"";position:absolute;left:-5%;right:-5%;top:44%;height:26px;background:#3d3d46;transform:rotate(-4deg)}
 .route::after{content:"";position:absolute;left:-5%;right:-5%;top:calc(44% + 11px);border-top:4px dashed var(--yellow);transform:rotate(-4deg)}
 
-/* slides */
-.invite-screen{position:relative;width:100%;height:100dvh;overflow:hidden;background:#eceef2;color:var(--ink);font-family:var(--body);font-size:18px;line-height:1.5;touch-action:pan-y}
-.slides{display:flex;height:100%;transition:transform .55s cubic-bezier(.65,0,.25,1)}
-.slide{flex:0 0 100%;height:100%;overflow-y:auto;display:flex;padding:24px 16px 120px;text-align:center}
+/* slides — stacked (not a horizontal strip) so fingers can't swipe between pages */
+.invite-screen{position:relative;width:100%;height:100dvh;overflow:hidden;overscroll-behavior:none;background:#eceef2;color:var(--ink);font-family:var(--body);font-size:18px;line-height:1.5;touch-action:pan-y}
+.slides{position:relative;height:100%;overflow:hidden}
+.slide{position:absolute;inset:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior-x:none;display:flex;padding:24px 16px 120px;text-align:center;opacity:0;visibility:hidden;pointer-events:none;touch-action:pan-y}
+.slide.active{opacity:1;visibility:visible;pointer-events:auto;z-index:1}
 .slide-body{margin:auto;width:100%;max-width:560px}
-.slide.active .slide-body{animation:slidepop .5s .25s cubic-bezier(.3,1.4,.5,1) both}
+.slide.active .slide-body{animation:slidepop .5s cubic-bezier(.3,1.4,.5,1) both}
 @keyframes slidepop{from{opacity:0;transform:translateY(24px) scale(.96)}to{opacity:1;transform:none}}
 .slide h2{font:400 2rem/1.1 var(--display);margin:0 0 14px}
 .slide-body.stack{display:grid;gap:16px}
@@ -317,10 +318,10 @@ a {
 .done h2{font-size:2.2rem}
 .confetti{position:fixed;top:-20px;width:10px;height:16px;z-index:40;pointer-events:none;animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
-@media (prefers-reduced-motion:reduce){.slides{transition:none}.slide.active .slide-body,.nav-next{animation:none}.confetti{display:none}}
+@media (prefers-reduced-motion:reduce){.slide.active .slide-body,.nav-next{animation:none}.confetti{display:none}}
 
-/* slide backgrounds */
-.slide{position:relative;background-size:cover;background-position:center;background-repeat:no-repeat}
+/* slide backgrounds — keep position:absolute from stacked .slide rule above */
+.slide{background-size:cover;background-position:center;background-repeat:no-repeat}
 .bg-1{background-color:#ffb200;background-image:url(/slide1-bg-tall.webp)}
 @media (min-aspect-ratio:1/1){.bg-1{background-image:url(/slide1-bg-wide.webp)}}
 .bg-2{background-color:#79c24a;background-image:url(/track-bg.svg)}
