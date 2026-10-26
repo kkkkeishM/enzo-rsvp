@@ -269,7 +269,7 @@ a {
 .route::after{content:"";position:absolute;left:-5%;right:-5%;top:calc(44% + 11px);border-top:4px dashed var(--yellow);transform:rotate(-4deg)}
 
 /* slides */
-.invite-screen{position:relative;width:100%;height:100dvh;overflow:hidden;background:#eceef2;color:var(--ink);font-family:var(--body);font-size:18px;line-height:1.5}
+.invite-screen{position:relative;width:100%;height:100dvh;overflow:hidden;background:#eceef2;color:var(--ink);font-family:var(--body);font-size:18px;line-height:1.5;touch-action:pan-y}
 .slides{display:flex;height:100%;transition:transform .55s cubic-bezier(.65,0,.25,1)}
 .slide{flex:0 0 100%;height:100%;overflow-y:auto;display:flex;padding:24px 16px 120px;text-align:center}
 .slide-body{margin:auto;width:100%;max-width:560px}
@@ -340,3 +340,8 @@ a {
 .swatch{display:inline-block;width:16px;height:16px;border-radius:50%;border:2px solid #15161c}
 .stack .card p{color:#15161c;font-weight:600}
 .stack .card p.arrive{font-weight:800;font-style:italic}
+
+
+/* no outline or text-selection box when clicking buttons */
+button{-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+button:focus:not(:focus-visible){outline:none}

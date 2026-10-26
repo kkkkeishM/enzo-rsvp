@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import RsvpForm from "./RsvpForm";
 import { EVENT, mapsLink } from "@/lib/event";
 
@@ -13,7 +13,6 @@ const Arrow = ({ dir }: { dir: "left" | "right" }) => (
 
 export default function Invitation({ onBack }: { onBack: () => void }) {
   const [i, setI] = useState(0);
-  const touchX = useRef<number | null>(null);
 
   const next = () => setI((v) => Math.min(v + 1, LAST));
   const prev = () => (i === 0 ? onBack() : setI((v) => v - 1));
@@ -38,14 +37,6 @@ export default function Invitation({ onBack }: { onBack: () => void }) {
   return (
     <main
       className="invite-screen"
-      onTouchStart={(e) => { touchX.current = e.touches[0].clientX; }}
-      onTouchEnd={(e) => {
-        if (touchX.current === null) return;
-        const dx = e.changedTouches[0].clientX - touchX.current;
-        touchX.current = null;
-        if (dx < -60) next();
-        if (dx > 60 && i > 0) prev();
-      }}
     >
       <div className="slides" style={{ transform: `translateX(-${i * 100}%)` }}>
         {/* Slide 1: welcome + schedule */}
