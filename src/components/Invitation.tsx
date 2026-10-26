@@ -30,7 +30,7 @@ export default function Invitation({ onBack }: { onBack: () => void }) {
   }, []);
 
   const sp = (n: number) => ({
-    className: `slide${i === n ? " active" : ""}`,
+    className: `slide bg-${n + 1}${i === n ? " active" : ""}`,
     inert: i !== n,
     "aria-hidden": i !== n,
   });
@@ -73,27 +73,41 @@ export default function Invitation({ onBack }: { onBack: () => void }) {
         {/* Slide 2: location */}
         <section {...sp(1)}>
           <div className="slide-body">
-            <h2>The track</h2>
+            <h2>Venue</h2>
             <div className="card">
               <div className="route" aria-hidden="true" />
-              <p>{EVENT.venue}<br />{EVENT.address}</p>
-              <a className="link" href={mapsLink(EVENT.address)} target="_blank" rel="noopener noreferrer">
+              <p className="venue-text">
+                  <span className="venue-name">{EVENT.venue}</span>
+                  <br />
+                  <span className="venue-address">{EVENT.address}</span>
+                </p>
+                <a className="link" href={mapsLink(EVENT.address)} target="_blank" rel="noopener noreferrer">
                 Get directions
               </a>
             </div>
           </div>
         </section>
 
-        {/* Slide 3: dress code + notes */}
+        {/* Slide 3: dress code + parking */}
         <section {...sp(2)}>
           <div className="slide-body stack">
             <div className="card">
               <h3>Dress code</h3>
-              <p>{EVENT.dressCode}</p>
+              <ul className="swatches">
+                {EVENT.dressColors.map((c) => (
+                  <li key={c.name}>
+                    <span className="swatch" style={{ background: c.hex }} aria-hidden="true" />
+                    {c.name}
+                  </li>
+                ))}
+              </ul>
+              <p>{EVENT.dressNote}</p>
             </div>
+
             <div className="card">
-              <h3>Good to know</h3>
-              <p>{EVENT.notes}</p>
+              <h3>Parking &amp; Arrival</h3>
+              <p>{EVENT.parking}</p>
+              <p className="arrive">{EVENT.arrival}</p>
             </div>
           </div>
         </section>
