@@ -247,7 +247,22 @@ a {
 .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
 .card{background:#fff;border:2px solid #d9dce3;border-radius:18px;padding:20px}
 .card h3{font:400 1.4rem/1.2 var(--display);margin:0 0 6px}
-.card p{margin:0 0 12px;color:#5a5f6b}
+.card p.venue-text {
+  margin: 20px 0 16px;
+  font-size: 1.15rem;
+  font-weight: 400;
+  line-height: 1.4;
+  color: #15161c;
+}
+
+.venue-name {
+  font-weight: 800;
+}
+
+.venue-address {
+  font-weight: 400;
+}
+.card p{margin:0 0 30px;color:#90939d}
 .link{display:inline-block;background:var(--blue);color:#fff;text-decoration:none;font-weight:800;border-radius:999px;padding:.5em 1.2em}
 .route{height:96px;border-radius:12px;margin-bottom:12px;background:#d9c08a;position:relative;overflow:hidden}
 .route::before{content:"";position:absolute;left:-5%;right:-5%;top:44%;height:26px;background:#3d3d46;transform:rotate(-4deg)}
@@ -303,3 +318,25 @@ a {
 .confetti{position:fixed;top:-20px;width:10px;height:16px;z-index:40;pointer-events:none;animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
 @media (prefers-reduced-motion:reduce){.slides{transition:none}.slide.active .slide-body,.nav-next{animation:none}.confetti{display:none}}
+
+/* slide backgrounds */
+.slide{position:relative;background-size:cover;background-position:center;background-repeat:no-repeat}
+.bg-1{background-color:#ffb200;background-image:url(/slide1-bg-tall.webp)}
+@media (min-aspect-ratio:1/1){.bg-1{background-image:url(/slide1-bg-wide.webp)}}
+.bg-2{background-color:#79c24a;background-image:url(/track-bg.svg)}
+.bg-3{background-color:#1d4f91;background-image:url(/pit-bg.svg)}
+.bg-4{background-color:#2b2c33;background-image:url(/grid-bg.svg)}
+
+/* make text readable on any background */
+.slide h2{display:inline-block;background:#fff;color:var(--ink);border:3px solid var(--ink);border-radius:14px;padding:.12em .6em;box-shadow:0 4px 0 var(--ink);transform:rotate(-1.5deg)}
+.inv-hero{box-shadow:0 8px 0 rgba(0,0,0,.25)}
+.slide-body.stack .card:nth-child(1){transform:rotate(-1.5deg)}
+.slide-body.stack .card:nth-child(2){transform:rotate(1.5deg)}
+.slide-nav{background:none}
+
+/* dress code swatches + arrival note */
+.swatches{list-style:none;margin:0 0 10px;padding:0;display:flex;flex-wrap:wrap;justify-content:center;gap:6px 14px;font-weight:800}
+.swatches li{display:flex;align-items:center;gap:6px}
+.swatch{display:inline-block;width:16px;height:16px;border-radius:50%;border:2px solid #15161c}
+.stack .card p{color:#15161c;font-weight:600}
+.stack .card p.arrive{font-weight:800;font-style:italic}
