@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { timingSafeEqual } from "crypto";
 import { getSupabase } from "@/lib/supabase";
+import { MAX_ATTENDANCE } from "@/lib/limits";
 
 function authorized(pw: unknown) {
   const expected = process.env.ADMIN_PASSWORD;
@@ -17,7 +18,7 @@ export async function POST(req: Request) {
   try {
     const { data, error } = await getSupabase()
       .from("rsvps")
-      .select("id,name,attending,guests,notes,updated_at")
+      .select("id,name,attending,guests,notes,updated_at,adults,kids,invite_code")
       .order("updated_at", { ascending: false });
     if (error) throw error;
 
@@ -28,8 +29,11 @@ export async function POST(req: Request) {
       count: r.guests as number,
       notes: r.notes as string,
       at: r.updated_at as string,
+      adults: (r.adults ?? []) as string[],
+      kids: (r.kids ?? []) as string[],
+      invite: (r.invite_code ?? null) as string | null,
     }));
-    return NextResponse.json({ guests });
+    return NextResponse.json({ guests, capacity: MAX_ATTENDANCE });
   } catch (e) {
     console.error("Guest list failed:", e);
     return NextResponse.json({ error: "Could not load" }, { status: 500 });

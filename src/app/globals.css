@@ -346,3 +346,65 @@ a {
 /* no outline or text-selection box when clicking buttons */
 button{-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
 button:focus:not(:focus-visible){outline:none}
+
+/* ===== RSVP: guest questions, reminder, confirmation dialog (add at the bottom of globals.css) ===== */
+.allow{margin:0;font-weight:800;font-size:.9rem;color:#5a5f6b;text-align:left}
+.party-line{margin:0;font-weight:800;text-align:left}
+.namelist{display:grid;gap:8px;margin-top:10px}
+.name-row{display:flex;gap:8px;align-items:center}
+.rsvp-form .name-row input[type=text]{flex:1;min-width:0;width:auto}
+.rm-btn,.add-btn{font:800 .85rem var(--body);color:var(--ink);background:#fff;border:2px solid var(--ink);border-radius:999px;padding:.35em .9em;cursor:pointer;box-shadow:0 2px 0 var(--ink)}
+.add-btn{justify-self:start}
+.add-btn:disabled,.choices input:disabled{opacity:.45;cursor:not-allowed}
+.rm-btn:active,.add-btn:active:not(:disabled){transform:translateY(2px);box-shadow:none}
+.rm-btn:focus-visible,.add-btn:focus-visible{outline:4px solid var(--blue);outline-offset:2px}
+
+.modal-back{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:16px;background:rgba(0,0,0,.55)}
+.modal{width:100%;max-width:420px;max-height:90dvh;overflow:auto;background:#fff;color:var(--ink);border:4px solid var(--ink);border-radius:20px;padding:20px;box-shadow:0 8px 0 var(--ink);text-align:left;font-family:var(--body);animation:bubblepop .3s cubic-bezier(.3,1.6,.5,1)}
+.modal h3{margin:0 0 10px;font:400 1.6rem/1.1 var(--display)}
+.modal-list{margin:0 0 12px;padding:0;list-style:none;display:grid;gap:6px}
+.modal-warn{margin:0 0 16px;font-weight:700;font-size:.9rem;color:#5a5f6b}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end}
+.modal-actions .btn-sm:disabled{opacity:.6;cursor:wait}
+@media (prefers-reduced-motion:reduce){.modal{animation:none}}
+
+/* ===== Guest list page (/guests) =====
+   Add at the bottom of globals.css. If you already have older .admin / .stat / .guest / .tag rules,
+   keep this block below them so these win. */
+   .admin{min-height:100dvh;background:#eceef2;color:#15161c;font-family:var(--body);font-size:16px;line-height:1.45;padding:24px 16px 60px}
+   .admin-wrap{max-width:760px;margin:0 auto}
+   .admin-wrap.wide{max-width:1100px}
+   .admin h1{font:400 2.2rem/1.1 var(--display);margin:0 0 16px}
+   .admin-login{display:flex;gap:10px;flex-wrap:wrap}
+   .admin-login input{flex:1;min-width:200px;font:inherit;padding:.6em .8em;border:2px solid #d9dce3;border-radius:12px;background:#fff;color:#15161c}
+   .btn-sm{font:800 1rem var(--body);color:#fff;background:#e63b2e;border:3px solid #15161c;border-radius:999px;padding:.45em 1.1em;box-shadow:0 3px 0 #15161c;cursor:pointer}
+   .btn-sm.alt{background:#fff;color:#15161c}
+   .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
+   .stat{background:#fff;border:3px solid #15161c;border-radius:16px;padding:12px;text-align:center;box-shadow:0 4px 0 #15161c}
+   .stat b{display:block;font:400 1.9rem/1 var(--display)}
+   .stat span{font-weight:800;font-size:.85rem}
+   .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
+   .tabs{display:inline-flex;border:3px solid #15161c;border-radius:999px;overflow:hidden;background:#fff}
+   .tabs button{font:800 .9rem var(--body);padding:.4em 1em;border:0;background:#fff;color:#15161c;cursor:pointer}
+   .tabs button.on{background:#ffc928}
+   .tools{display:flex;gap:8px;margin-left:auto}
+   .tag{display:inline-block;font-weight:800;font-size:.8rem;border-radius:999px;padding:.15em .75em;color:#fff;white-space:nowrap}
+   .tag.yes{background:#2e9e4f}
+   .tag.no{background:#c0392b}
+   .role{display:inline-block;font-weight:800;font-size:.8rem;border-radius:999px;padding:.15em .75em;border:2px solid #15161c;background:#fff}
+   .role.adult{background:#bfe8ff}
+   .role.kid{background:#ffe08a}
+   .table-wrap{overflow-x:auto;background:#fff;border:3px solid #15161c;border-radius:16px;box-shadow:0 4px 0 #15161c}
+   .gtable{width:100%;min-width:780px;border-collapse:collapse;font-size:.95rem}
+   .gtable th{position:sticky;top:0;background:#15161c;color:#ffc928;text-align:left;font-weight:800;padding:.7em .8em;white-space:nowrap}
+   .gtable td{padding:.65em .8em;border-top:1px solid #e3e5eb;vertical-align:top}
+   .gtable tbody tr:nth-child(even){background:#f6f7fa}
+   .gtable .num{text-align:center;font-weight:800}
+   .gtable .nm{font-weight:800}
+   .gtable .notes{max-width:240px;font-style:italic}
+   .gtable .when{white-space:nowrap;color:#5a5f6b;font-size:.85rem}
+   .gtable .empty{text-align:center;color:#5a5f6b;padding:1.4em}
+   .gtable tfoot td{background:#fff7d6;font-weight:800;border-top:3px solid #15161c}
+   .del{background:none;border:0;color:#c0392b;font-weight:800;cursor:pointer}
+   .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+   @media (max-width:560px){.stats{grid-template-columns:1fr}.tools{margin-left:0}}
