@@ -1,9 +1,11 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import RsvpForm from "./RsvpForm";
+import WishDialog from "./WishDialog";
+import WishWall from "./WishWall";
 import { EVENT, mapsLink } from "@/lib/event";
 
-const LAST = 3;
+const LAST = 4;
 
 const Arrow = ({ dir }: { dir: "left" | "right" }) => (
   <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -13,6 +15,10 @@ const Arrow = ({ dir }: { dir: "left" | "right" }) => (
 
 export default function Invitation({ onBack }: { onBack: () => void }) {
   const [i, setI] = useState(0);
+  const touchX = useRef<number | null>(null);
+  const [wish, setWish] = useState<{ open: boolean; name: string }>({ open: false, name: "" });
+  const [wallKey, setWallKey] = useState(0);
+  const [wallNote, setWallNote] = useState("");
 
   const next = () => setI((v) => Math.min(v + 1, LAST));
   const prev = () => (i === 0 ? onBack() : setI((v) => v - 1));
@@ -35,8 +41,18 @@ export default function Invitation({ onBack }: { onBack: () => void }) {
   });
 
   return (
-    <main className="invite-screen">
-      <div className="slides">
+    <main
+      className="invite-screen"
+      onTouchStart={(e) => { touchX.current = e.touches[0].clientX; }}
+      onTouchEnd={(e) => {
+        if (touchX.current === null) return;
+        const dx = e.changedTouches[0].clientX - touchX.current;
+        touchX.current = null;
+        if (dx < -60) next();
+        if (dx > 60 && i > 0) prev();
+      }}
+    >
+      <div className="slides" style={{ transform: `translateX(-${i * 100}%)` }}>
         {/* Slide 1: welcome + schedule */}
         <section {...sp(0)}>
           <div className="slide-body combo">
@@ -104,8 +120,20 @@ export default function Invitation({ onBack }: { onBack: () => void }) {
         {/* Slide 4: RSVP */}
         <section {...sp(3)}>
           <div className="slide-body">
-            <h2>RSVP</h2>
-            <RsvpForm />
+            <RsvpForm heading="Be Part of the Fun" onWrite={(name) => setWish({ open: true, name })} />
+          </div>
+        </section>
+
+        {/* Slide 5: birthday wish wall */}
+        <section {...sp(4)} className={`${sp(4).className} wall-slide`}>
+          <div className="slide-body">
+            <h2 className="wall-title">Birthday Wish Wall</h2>
+            <WishWall
+              active={i === 4}
+              refreshKey={wallKey}
+              note={wallNote}
+              onWrite={() => setWish({ open: true, name: "" })}
+            />
           </div>
         </section>
       </div>
@@ -134,6 +162,18 @@ export default function Invitation({ onBack }: { onBack: () => void }) {
           <span />
         )}
       </nav>
+
+      <WishDialog
+        open={wish.open}
+        initialName={wish.name}
+        onClose={() => setWish({ open: false, name: "" })}
+        onSent={(pending) => {
+          setWish({ open: false, name: "" });
+          setWallNote(pending ? "Thank you! Your wish will float up once it’s approved." : "");
+          setWallKey((k) => k + 1);
+          setI(4);
+        }}
+      />
     </main>
   );
 }

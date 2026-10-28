@@ -269,9 +269,10 @@ a {
 .route::after{content:"";position:absolute;left:-5%;right:-5%;top:calc(44% + 11px);border-top:4px dashed var(--yellow);transform:rotate(-4deg)}
 
 /* slides — stacked (not a horizontal strip) so fingers can't swipe between pages */
-.invite-screen{position:relative;width:100%;height:100dvh;overflow:hidden;overscroll-behavior:none;background:#eceef2;color:var(--ink);font-family:var(--body);font-size:18px;line-height:1.5;touch-action:pan-y}
-.slides{position:relative;height:100%;overflow:hidden}
-.slide{position:absolute;inset:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior-x:none;display:flex;padding:24px 16px 120px;text-align:center;opacity:0;visibility:hidden;pointer-events:none;touch-action:pan-y}
+.invite-screen{position:relative;width:100%;height:100dvh;overflow:hidden;background:#eceef2}
+.slides{display:flex;height:100%;transition:transform .55s cubic-bezier(.65,0,.25,1)}
+.slide{flex:0 0 100%;height:100%;overflow-y:auto;display:flex;padding:24px 16px 120px;text-align:center}
+.slide-body{margin:auto;width:100%;max-width:560px}
 .slide.active{opacity:1;visibility:visible;pointer-events:auto;z-index:1}
 .slide-body{margin:auto;width:100%;max-width:560px}
 .slide.active .slide-body{animation:slidepop .5s cubic-bezier(.3,1.4,.5,1) both}
@@ -321,12 +322,15 @@ a {
 @media (prefers-reduced-motion:reduce){.slide.active .slide-body,.nav-next{animation:none}.confetti{display:none}}
 
 /* slide backgrounds — keep position:absolute from stacked .slide rule above */
-.slide{background-size:cover;background-position:center;background-repeat:no-repeat}
+.slide{position:relative;background-size:cover;background-position:center;background-repeat:no-repeat}
 .bg-1{background-color:#ffb200;background-image:url(/slide1-bg-tall.webp)}
 @media (min-aspect-ratio:1/1){.bg-1{background-image:url(/slide1-bg-wide.webp)}}
 .bg-2{background-color:#79c24a;background-image:url(/track-bg.svg)}
 .bg-3{background-color:#1d4f91;background-image:url(/pit-bg.svg)}
 .bg-4{background-color:#2b2c33;background-image:url(/grid-bg.svg)}
+.bg-5{background-color:#6ec3f5;background-image:url(/sky-bg.svg)}
+
+.bg-4 .slide-body{padding-bottom:40px}
 
 /* make text readable on any background */
 .slide h2{display:inline-block;background:#fff;color:var(--ink);border:3px solid var(--ink);border-radius:14px;padding:.12em .6em;box-shadow:0 4px 0 var(--ink);transform:rotate(-1.5deg)}
@@ -408,3 +412,52 @@ button:focus:not(:focus-visible){outline:none}
    .del{background:none;border:0;color:#c0392b;font-weight:800;cursor:pointer}
    .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
    @media (max-width:560px){.stats{grid-template-columns:1fr}.tools{margin-left:0}}
+
+   /* readable dark text on the invitation */
+.invite-screen{color:#15161c}
+.rsvp-form,.rsvp-form label,.rsvp-form .legend,.choices label,.rsvp-note,.party-line{color:#15161c}
+.modal,.wish-form,.wall-note{color:#15161c}
+
+
+/* ===== Wish wall + wish dialog: add at the bottom of globals.css ===== */
+.bg-5{background-color:#6ec3f5;background-image:url(/sky-bg.svg)}
+.slide.wall-slide{padding:0;overflow:hidden}
+.wall-slide .slide-body{position:static;max-width:none;width:100%;height:100%;margin:0}
+.wall-title{position:absolute;top:18px;left:50%;z-index:6;margin:0;white-space:nowrap;transform:translateX(-50%) rotate(-1.5deg)!important}
+
+.wall{position:absolute;inset:0;overflow:hidden}
+.bl{--w:clamp(118px,34vw,176px);position:absolute;bottom:-320px;left:calc((100% - var(--w)) * var(--x) / 100);width:var(--w);animation:blrise var(--d) linear infinite;animation-delay:var(--s)}
+@keyframes blrise{from{transform:translateY(0)}to{transform:translateY(calc(-100dvh - 380px))}}
+.bl-sway{transform-origin:50% 100%;animation:blsway var(--sw) ease-in-out infinite alternate}
+@keyframes blsway{from{transform:translateX(-12px) rotate(-3deg)}to{transform:translateX(12px) rotate(3deg)}}
+.bl-body{display:grid;align-content:center;justify-items:center;gap:3px;width:100%;aspect-ratio:.82;padding:13% 11% 17%;border:0;border-radius:50% 50% 48% 48% / 58% 58% 42% 42%;color:#fff;text-align:center;font-family:var(--body);cursor:pointer;background:radial-gradient(circle at 32% 24%,rgba(255,255,255,.55),transparent 34%),var(--c);box-shadow:inset -8px -10px 18px rgba(0,0,0,.18),0 8px 16px rgba(0,0,0,.22)}
+.bl-body b{font:400 .85rem/1.1 var(--display);overflow:hidden;text-overflow:ellipsis;max-width:100%;white-space:nowrap}
+.bl-body span{font-weight:700;font-size:.7rem;line-height:1.2;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+.bl-body.photo{display:block;padding:0;overflow:hidden;border:5px solid #fff;cursor:default}
+.bl-body.photo img{display:block;width:100%;height:100%;object-fit:cover}
+.bl-knot{display:block;width:13px;height:11px;margin:-3px auto 0;background:var(--c);filter:brightness(.82);clip-path:polygon(50% 0,100% 100%,0 100%)}
+.bl-string{display:block;width:2px;height:90px;margin:0 auto;background:rgba(255,255,255,.75)}
+
+.wall-actions{position:absolute;left:0;right:0;bottom:86px;z-index:6;display:flex;flex-direction:column;align-items:center;gap:8px;padding:0 16px}
+.wall-note{margin:0;max-width:340px;padding:.4em .9em;background:#fff;border:3px solid var(--ink);border-radius:14px;font-weight:800;font-size:.85rem;text-align:center}
+.wall-link{background:#fff;color:var(--ink);border:3px solid var(--ink);border-radius:999px;padding:.3em 1em;font:800 .85rem var(--body);cursor:pointer;box-shadow:0 3px 0 var(--ink)}
+.wall-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);margin:0;padding:0;list-style:none}
+
+.wish-full{margin:0 0 16px;font-size:1.05rem;font-weight:600;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+.wish-list{margin:0 0 14px;padding:0;list-style:none;display:grid;gap:10px;max-height:50dvh;overflow:auto}
+.wish-list li{display:grid;gap:2px;padding-bottom:10px;border-bottom:2px dashed #d9dce3}
+.wish-list span{font-weight:600;word-break:break-word}
+
+.wish-form{display:grid;gap:6px}
+.wish-form label{font-weight:800}
+.wish-form input[type=text],.wish-form textarea{width:100%;font:inherit;color:var(--ink);background:#f4f5f8;border:2px solid #d9dce3;border-radius:12px;padding:.6em .8em}
+.wish-form input:focus-visible,.wish-form textarea:focus-visible{outline:4px solid var(--blue);outline-offset:2px}
+.wish-count{justify-self:end;font-weight:800;color:#5a5f6b}
+.hp{position:absolute!important;left:-9999px!important;width:1px;height:1px;opacity:0}
+.done .wish-btn{margin-top:16px}
+
+@media (prefers-reduced-motion:reduce){
+  .wall{overflow-y:auto;display:flex;flex-wrap:wrap;justify-content:center;align-content:flex-start;gap:18px;padding:80px 12px 190px}
+  .bl{position:relative;bottom:auto;left:auto;animation:none}
+  .bl-sway{animation:none}
+}

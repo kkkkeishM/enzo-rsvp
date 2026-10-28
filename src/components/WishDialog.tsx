@@ -15,7 +15,6 @@ export default function WishDialog({
 }) {
   const [author, setAuthor] = useState(initialName);
   const [message, setMessage] = useState("");
-  const [trap, setTrap] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const msgRef = useRef<HTMLTextAreaElement>(null);
@@ -43,7 +42,7 @@ export default function WishDialog({
       const res = await fetch("/api/wishes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ author: author.trim(), message: message.trim(), website: trap }),
+        body: JSON.stringify({ author: author.trim(), message: message.trim() }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -78,9 +77,6 @@ export default function WishDialog({
         <label htmlFor="wish-message">Your wish</label>
         <textarea id="wish-message" ref={msgRef} rows={4} maxLength={MAX_MESSAGE} placeholder="Happy 1st birthday, Enzo!" value={message} onChange={(e) => setMessage(e.target.value)} />
         <small className="wish-count">{message.length}/{MAX_MESSAGE}</small>
-
-        {/* hidden trap for spam bots */}
-        <input className="hp" type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" value={trap} onChange={(e) => setTrap(e.target.value)} />
 
         <p className="err" role="alert">{error}</p>
         <div className="modal-actions">

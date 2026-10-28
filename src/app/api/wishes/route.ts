@@ -36,9 +36,6 @@ export async function POST(req: Request) {
     return fail("Bad request");
   }
 
-  // hidden field only bots fill in: pretend it worked
-  if (typeof body.website === "string" && body.website.trim()) return NextResponse.json({ ok: true });
-
   const author = clean(body.author, MAX_AUTHOR);
   const message = clean(body.message, MAX_MESSAGE);
   if (!author) return fail("Please add your name.");

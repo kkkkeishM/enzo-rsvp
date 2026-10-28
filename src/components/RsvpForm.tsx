@@ -89,7 +89,7 @@ function NameList({
   );
 }
 
-export default function RsvpForm() {
+export default function RsvpForm({ heading, onWrite }: { heading?: string; onWrite?: (name: string) => void }) {
   const [name, setName] = useState("");
   const [attending, setAttending] = useState<Answer>("yes");
   const [bringAdult, setBringAdult] = useState<Answer>("no");
@@ -221,12 +221,18 @@ export default function RsvpForm() {
             ? `Thanks, ${first}. We saved ${finalParty} ${finalParty === 1 ? "spot" : "spots"} for your crew. See you at the track!`
             : "Thanks for letting us know. We’ll save you a slice of cake."}
         </p>
+        {onWrite && (
+          <button type="button" className="btn wish-btn" onClick={() => onWrite(name.trim())}>
+            Write a birthday wish 🎈
+          </button>
+        )}
       </div>
     );
   }
 
   return (
     <>
+      {heading && <h2>{heading}</h2>}
       <form className="rsvp-form" onSubmit={review} noValidate>
         {info.label && <p className="allow">Invitation for: {info.label}</p>}
         {blocked && <p className="err" role="alert">{blocked}</p>}
