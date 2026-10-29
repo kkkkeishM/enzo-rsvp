@@ -25,22 +25,23 @@ export default function Invitation({ onBack }: { onBack: () => void }) {
   const [wallKey, setWallKey] = useState(0);
   const [wished, setWished] = useState(false);
   const [wallNote, setWallNote] = useState("");
+  const [wallOpen, setWallOpen] = useState(false);
   
   
 
-  const next = () => setI((v) => Math.min(v + 1, LAST));
+  const next = () => setI((v) => (v === 3 && !wallOpen ? v : Math.min(v + 1, LAST)));
   const prev = () => (i === 0 ? onBack() : setI((v) => v - 1));
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       const tag = (e.target as HTMLElement).tagName;
       if (["INPUT", "TEXTAREA", "SELECT"].includes(tag)) return;
-      if (e.key === "ArrowRight") setI((v) => Math.min(v + 1, LAST));
+      if (e.key === "ArrowRight") setI((v) => (v === 3 && !wallOpen ? v : Math.min(v + 1, LAST)));
       if (e.key === "ArrowLeft") setI((v) => Math.max(v - 1, 0));
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [wallOpen]);
 
   useEffect(() => {
     if (i !== 4) setWallIntroDone(false);
@@ -160,7 +161,7 @@ export default function Invitation({ onBack }: { onBack: () => void }) {
               heading="Be Part of the Fun"
               onWrite={(name) => setWish({ open: true, name })}
               wished={wished}
-              onOpenWall={() => setI(4)}
+              onOpenWall={() => { setWallOpen(true); setI(4); }}
             />
           </div>
         </section>
@@ -184,7 +185,7 @@ export default function Invitation({ onBack }: { onBack: () => void }) {
           <Arrow dir="left" /> Back
         </button>
         <div className="dots">
-          {Array.from({ length: LAST + 1 }, (_, n) => (
+        {Array.from({ length: wallOpen ? LAST + 1 : LAST }, (_, n) => (
             <button
               key={n}
               type="button"
@@ -255,6 +256,7 @@ export default function Invitation({ onBack }: { onBack: () => void }) {
         initialName={wish.name}
         onClose={() => setWish({ open: false, name: "" })}
         onSent={(pending) => {
+          setWallOpen(true); setI(4);
           setWished(true);
           setWish({ open: false, name: "" });
           setWallNote(pending ? "Thank you! Your wish will float up once it’s approved." : "");
