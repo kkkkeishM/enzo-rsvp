@@ -89,7 +89,14 @@ function NameList({
   );
 }
 
-export default function RsvpForm({ heading, onWrite }: { heading?: string; onWrite?: (name: string) => void }) {
+export default function RsvpForm({
+  heading, onWrite, wished, onOpenWall,
+  }: {
+    heading?: string;
+    onWrite?: (name: string) => void;
+    wished?: boolean;
+    onOpenWall?: () => void;
+  }) {
   const [name, setName] = useState("");
   const [attending, setAttending] = useState<Answer>("yes");
   const [bringAdult, setBringAdult] = useState<Answer>("no");
@@ -215,16 +222,26 @@ export default function RsvpForm({ heading, onWrite }: { heading?: string; onWri
     return (
       <div className="done" role="status">
         {going && <Confetti />}
-        <h2>{going ? "You’re on the starting grid!" : `We’ll miss you, ${first}!`}</h2>
+        <h2>{going ? "Buckle Up, We're celebrating!" : `No worries, ${first}!`}</h2>
         <p>
           {going
             ? `Thanks, ${first}. We saved ${finalParty} ${finalParty === 1 ? "spot" : "spots"} for your crew. See you at the track!`
-            : "Thanks for letting us know. We’ll save you a slice of cake."}
+            : "Thanks for letting us know. We'll celebrate with you another time. Sending lots of love from Enzo!"}
         </p>
-        {onWrite && (
-          <button type="button" className="btn wish-btn" onClick={() => onWrite(name.trim())}>
-            Write a birthday wish 🎈
-          </button>
+        {wished ? (
+          <>
+            {onOpenWall && (
+              <button type="button" className="btn wish-btn" onClick={onOpenWall}>
+                See the wish wall🖼️
+              </button>
+            )}
+          </>
+        ) : (
+          onWrite && (
+            <button type="button" className="btn wish-btn" onClick={() => onWrite(name.trim())}>
+              Write a birthday wish🌠
+            </button>
+          )
         )}
       </div>
     );

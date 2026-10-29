@@ -1,10 +1,10 @@
 "use client";
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
-import { WALL_PHOTOS } from "@/lib/wall";
+import PolaroidWall from "./Polaroidwall";
 
 type Wish = { id: string; author: string; message: string; at: string };
-type Item = { key: string; wish?: Wish; photo?: string };
+type Item = { key: string; wish: Wish };
 
 const COLORS = ["#e63b2e", "#2f7fd8", "#2e9e4f", "#8e5bd6", "#f07a12", "#e0457b", "#139aa8"];
 const MAX_WISHES_ON_WALL = 10; // keeps the sky from getting crowded; "See all" shows the rest
@@ -63,34 +63,24 @@ export default function WishWall({
     return () => { stop = true; window.clearInterval(t); };
   }, [active, refreshKey]);
 
-  const items = useMemo<Item[]>(() => {
-    const out: Item[] = [];
-    wishes.slice(0, MAX_WISHES_ON_WALL).forEach((w, i) => {
-      out.push({ key: w.id, wish: w });
-      if (WALL_PHOTOS.length && i % 2 === 0) {
-        out.push({ key: `photo-${w.id}`, photo: WALL_PHOTOS[hash(w.id) % WALL_PHOTOS.length] });
-      }
-    });
-    if (wishes.length === 0) WALL_PHOTOS.slice(0, 6).forEach((src, i) => out.push({ key: `photo-${i}`, photo: src }));
-    return out;
-  }, [wishes]);
+  const items = useMemo<Item[]>(
+    () => wishes.slice(0, MAX_WISHES_ON_WALL).map((w) => ({ key: w.id, wish: w })),
+    [wishes]
+  );
 
   return (
     <div className="wall">
+      {/* the polaroid photo wall sits behind everything */}
+      <PolaroidWall />
+
+      {/* wish balloons float up in front of the photos */}
       {items.map((it) => (
         <div className="bl" key={it.key} style={balloonStyle(it.key)}>
           <div className="bl-sway">
-            {it.wish ? (
-              <button type="button" className="bl-body" onClick={() => setRead(it.wish!)} aria-label={`Read the wish from ${it.wish.author}`}>
-                <b>{it.wish.author}</b>
-                <span>{it.wish.message}</span>
-              </button>
-            ) : (
-              <div className="bl-body photo">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={it.photo} alt="" />
-              </div>
-            )}
+            <button type="button" className="bl-body" onClick={() => setRead(it.wish)} aria-label={`Read the wish from ${it.wish.author}`}>
+              <b>{it.wish.author}</b>
+              <span>{it.wish.message}</span>
+            </button>
             <i className="bl-knot" />
             <i className="bl-string" />
           </div>
@@ -103,10 +93,12 @@ export default function WishWall({
       </ul>
 
       <div className="wall-actions">
-        {note && <p className="wall-note">{note}</p>}
-        {failed && <p className="wall-note">Couldn’t load the wishes just now.</p>}
-        {loaded && !failed && wishes.length === 0 && <p className="wall-note">No wishes yet. Be the first to send one for Enzo!</p>}
-        <button className="btn" type="button" onClick={onWrite}>Write a birthday wish</button>
+        <div className="wall-notes">
+          {note && <p className="wall-note">{note}</p>}
+          {failed && <p className="wall-note">Couldn’t load the wishes just now.</p>}
+          {loaded && !failed && wishes.length === 0 && <p className="wall-note">No wishes yet. Be the first to send one for Enzo!</p>}
+        </div>
+       
         {wishes.length > 0 && (
           <button className="wall-link" type="button" onClick={() => setShowAll(true)}>See all {wishes.length} {wishes.length === 1 ? "wish" : "wishes"}</button>
         )}

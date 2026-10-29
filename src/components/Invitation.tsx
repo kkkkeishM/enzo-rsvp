@@ -1,9 +1,11 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import WallIntro from "./WallIntro";
 import RsvpForm from "./RsvpForm";
 import WishDialog from "./WishDialog";
 import WishWall from "./WishWall";
-import { EVENT, mapsLink } from "@/lib/event";
+import { EVENT, GIFTS, googleDirections, wazeDirections } from "@/lib/event";
 
 const LAST = 4;
 
@@ -16,9 +18,15 @@ const Arrow = ({ dir }: { dir: "left" | "right" }) => (
 export default function Invitation({ onBack }: { onBack: () => void }) {
   const [i, setI] = useState(0);
   const touchX = useRef<number | null>(null);
+  const [giftOpen, setGiftOpen] = useState(false);
+  const [wallIntroDone, setWallIntroDone] = useState(false);
+  const finishIntro = useCallback(() => setWallIntroDone(true), []);
   const [wish, setWish] = useState<{ open: boolean; name: string }>({ open: false, name: "" });
   const [wallKey, setWallKey] = useState(0);
+  const [wished, setWished] = useState(false);
   const [wallNote, setWallNote] = useState("");
+  
+  
 
   const next = () => setI((v) => Math.min(v + 1, LAST));
   const prev = () => (i === 0 ? onBack() : setI((v) => v - 1));
@@ -34,11 +42,27 @@ export default function Invitation({ onBack }: { onBack: () => void }) {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  useEffect(() => {
+    if (i !== 4) setWallIntroDone(false);
+  }, [i]);
+
+  const giftRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!giftOpen) return;
+    const el = giftRef.current;
+    if (el) el.scrollTop = 0;
+    const id = requestAnimationFrame(() => { if (giftRef.current) giftRef.current.scrollTop = 0; });
+    return () => cancelAnimationFrame(id);
+  }, [giftOpen]);
+
   const sp = (n: number) => ({
     className: `slide bg-${n + 1}${i === n ? " active" : ""}`,
     inert: i !== n,
     "aria-hidden": i !== n,
   });
+
+ 
 
   return (
     <main
@@ -86,9 +110,14 @@ export default function Invitation({ onBack }: { onBack: () => void }) {
                 <br />
                 <span className="venue-address">{EVENT.address}</span>
               </p>
-              <a className="link" href={mapsLink(EVENT.address)} target="_blank" rel="noopener noreferrer">
-                Get directions
-              </a>
+              <div className="dir-links">
+                <a className="link" href={googleDirections(EVENT.address)} target="_blank" rel="noopener noreferrer">
+                  Google Maps
+                </a>
+                <a className="link waze" href={wazeDirections(EVENT.address)} target="_blank" rel="noopener noreferrer">
+                  Waze
+                </a>
+              </div>
             </div>
           </div>
         </section>
@@ -114,18 +143,30 @@ export default function Invitation({ onBack }: { onBack: () => void }) {
               <p>{EVENT.parking}</p>
               <p className="arrive">{EVENT.arrival}</p>
             </div>
+            <div className="card gift-card">
+              <h3>Gift ideas</h3>
+              <p>Your presence is the best gift! Curious what Enzo could use?</p>
+              <button type="button" className="btn-sm" onClick={() => setGiftOpen(true)}>
+                🎁 See gift ideas
+              </button>
+            </div>
           </div>
         </section>
 
         {/* Slide 4: RSVP */}
         <section {...sp(3)}>
           <div className="slide-body">
-            <RsvpForm heading="Be Part of the Fun" onWrite={(name) => setWish({ open: true, name })} />
+          <RsvpForm
+              heading="Be Part of the Fun"
+              onWrite={(name) => setWish({ open: true, name })}
+              wished={wished}
+              onOpenWall={() => setI(4)}
+            />
           </div>
         </section>
 
         {/* Slide 5: birthday wish wall */}
-        <section {...sp(4)} className={`${sp(4).className} wall-slide`}>
+        <section {...sp(4)} className={`${sp(4).className} wall-slide${i === 4 && !wallIntroDone ? " intro-run" : ""}`}>
           <div className="slide-body">
             <h2 className="wall-title">Birthday Wish Wall</h2>
             <WishWall
@@ -154,7 +195,7 @@ export default function Invitation({ onBack }: { onBack: () => void }) {
             />
           ))}
         </div>
-        {i < LAST ? (
+        {i < LAST && i !== 3 ? (
           <button className="nav-next" type="button" onClick={next}>
             Next <Arrow dir="right" />
           </button>
@@ -162,12 +203,59 @@ export default function Invitation({ onBack }: { onBack: () => void }) {
           <span />
         )}
       </nav>
+      
+
+      {giftOpen &&
+        createPortal(
+          <div
+            className="modal-back"
+            onClick={() => setGiftOpen(false)}
+            onTouchStart={(e) => e.stopPropagation()}
+            onTouchEnd={(e) => e.stopPropagation()}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") setGiftOpen(false);
+              e.stopPropagation();
+            }}
+          >
+            <div
+              className="modal gift-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="gift-title"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 id="gift-title">🎁 {GIFTS.title}</h3>
+              <p className="gift-intro">{GIFTS.intro}</p>
+              <ul className="gift-list">
+                {GIFTS.ideas.map((g) => (
+                  <li key={g.title}>
+                    <span className="gift-emoji" aria-hidden="true">{g.emoji}</span>
+                    <div>
+                      <b>{g.title}</b>
+                      <p>{g.text}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              <p className="gift-outro">{GIFTS.outro}</p>
+              <div className="modal-actions">
+                <button type="button" className="btn-sm" onClick={() => setGiftOpen(false)}>
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
+
+      {i === 4 && !wallIntroDone && <WallIntro onDone={finishIntro} />}   
 
       <WishDialog
         open={wish.open}
         initialName={wish.name}
         onClose={() => setWish({ open: false, name: "" })}
         onSent={(pending) => {
+          setWished(true);
           setWish({ open: false, name: "" });
           setWallNote(pending ? "Thank you! Your wish will float up once it’s approved." : "");
           setWallKey((k) => k + 1);
