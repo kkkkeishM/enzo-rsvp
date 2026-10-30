@@ -3,7 +3,7 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 import { WALL_PHOTOS, BLANK_CAPTIONS } from "@/lib/wall";
 
-const SLOTS = 20;
+const SLOTS = 30;
 
 type Slot = { src?: string; caption?: string };
 
@@ -72,7 +72,10 @@ export default function PolaroidWall() {
                       alt={`Photo ${i + 1} of Enzo`}
                       loading="lazy"
                       decoding="async"
-                      onError={() => setBroken((prev) => new Set(prev).add(i))}
+                      onError={() => {
+                        console.warn("Photo failed to load:", slot.src);
+                        setBroken((prev) => new Set(prev).add(i));
+                      }}
                     />
                   )}
                 </span>

@@ -27,7 +27,17 @@ export const WALL_PHOTOS: WallPhoto[] = [
   "/wall/enzo-17.jpg",
   { src: "/wall/enzo-18.jpg", caption: "VROOM" },
   "/wall/enzo-19.jpg",
-  { src: "/wall/enzo-20.jpg", caption: "Zoom zoom" },
+  { src: "/wall/enzo-20.png", caption: "Zoom zoom" },
+  "/wall/enzo-21.jpg",
+  { src: "/wall/enzo-22.jpg", caption: "Race day" },
+  "/wall/enzo-23.jpg",
+  { src: "/wall/enzo-24.jpg", caption: "Fast as lightning" },
+  "/wall/enzo-25.jpg",
+  { src: "/wall/enzo-26.jpg", caption: "VROOM" },
+  "/wall/enzo-27.png",
+  { src: "/wall/enzo-28.png", caption: "Luan!" },
+  "/wall/enzo-29.png",
+  { src: "/wall/enzo-30.png", caption: "Speed" },
 ];
 
 // Captions printed under the empty frames until you add more photos.

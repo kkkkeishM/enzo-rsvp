@@ -146,6 +146,7 @@ export default function RsvpForm({
 
   function chooseAttending(v: Answer) {
     setAttending(v);
+    setNotes("");
     if (v === "no") {
       setBringAdult("no"); setAdults([""]);
       setBringKids("no"); setKids([""]);
@@ -163,6 +164,7 @@ export default function RsvpForm({
   function validate(): string {
     if (blocked) return blocked;
     if (!name.trim()) return "Enter your name so we know who is on the grid.";
+    if (!going && !notes.trim()) return "Please tell us why you can’t make it.";
     if (!going) return "";
     if (bringAdult === "yes" && adults.some((n) => !n.trim())) return "Enter the full name of your adult guest.";
     if (bringKids === "yes" && kids.some((n) => !n.trim())) return "Enter the full name of every child, or remove the empty fields.";
@@ -222,12 +224,22 @@ export default function RsvpForm({
     return (
       <div className="done" role="status">
         {going && <Confetti />}
-        <h2>{going ? "Buckle Up, We're celebrating!" : `No worries, ${first}!`}</h2>
-        <p>
-          {going
-            ? `Thanks, ${first}. We saved ${finalParty} ${finalParty === 1 ? "spot" : "spots"} for your crew. See you at the track!`
-            : "Thanks for letting us know. We'll celebrate with you another time. Sending lots of love from Enzo!"}
-        </p>
+        <h2>{going ? "Buckle Up, We're celebrating!" : `No worries, ${first}! ❤️`}</h2>
+
+        {going ? (
+          <p>
+            {`Thanks, ${first}. We saved ${finalParty} ${finalParty === 1 ? "spot" : "spots"} for your crew. See you at the track!`}
+          </p>
+        ) : (
+          <>
+            <p>
+              We would’ve loved to celebrate Enzo’s special day with you, but we completely understand. Thank you for letting us know!
+            </p>
+            <p>
+              Even if you can’t make it, you can still send Enzo some love through a little birthday wish. 🌠
+            </p>
+          </>
+        )}
         {wished ? (
           <>
             {onOpenWall && (
@@ -239,7 +251,7 @@ export default function RsvpForm({
         ) : (
           onWrite && (
             <button type="button" className="btn wish-btn" onClick={() => onWrite(name.trim())}>
-              Write a birthday wish🌠
+              {going ? "Write a birthday wish🌠" : "Leave a Birthday Wish for Enzo ♡"}
             </button>
           )
         )}
@@ -292,10 +304,18 @@ export default function RsvpForm({
           </>
         )}
 
-        <div>
-          <label htmlFor="rsvp-notes">Food allergies or notes (optional)</label>
-          <textarea id="rsvp-notes" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
-        </div>
+      <div>
+        <label htmlFor="rsvp-notes">
+          {going ? "Food allergies or notes (optional)" : "Reason for not attending"}
+        </label>
+        <textarea
+          id="rsvp-notes"
+          rows={2}
+          placeholder={going ? "" : "Let us know why you can’t make it"}
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+        />
+      </div>
 
         <p className="err" role="alert">{error}</p>
         <button className="btn" type="submit" disabled={status !== "idle" || !!blocked}>

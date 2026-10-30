@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import PolaroidWall from "./Polaroidwall";
 
@@ -42,6 +42,45 @@ export default function WishWall({
   const [read, setRead] = useState<Wish | null>(null);
   const [showAll, setShowAll] = useState(false);
 
+  // dragging: remember where each balloon was dropped, and ignore the click that follows a drag
+  const offsets = useRef<Record<string, { x: number; y: number }>>({});
+  const drag = useRef<{ key: string; el: HTMLElement; sx: number; sy: number; ox: number; oy: number; moved: boolean } | null>(null);
+  const justDragged = useRef(false);
+
+  function onDown(e: React.PointerEvent<HTMLButtonElement>, key: string) {
+    const el = e.currentTarget.closest(".bl") as HTMLElement | null;
+    if (!el) return;
+    const o = offsets.current[key] ?? { x: 0, y: 0 };
+    drag.current = { key, el, sx: e.clientX, sy: e.clientY, ox: o.x, oy: o.y, moved: false };
+    e.currentTarget.setPointerCapture(e.pointerId);
+  }
+
+  function onMove(e: React.PointerEvent<HTMLButtonElement>) {
+    const d = drag.current;
+    if (!d) return;
+    const dx = e.clientX - d.sx;
+    const dy = e.clientY - d.sy;
+    if (!d.moved && Math.hypot(dx, dy) < 6) return; // small wiggles still count as a tap
+    d.moved = true;
+    d.el.classList.add("dragging");
+    const x = d.ox + dx;
+    const y = d.oy + dy;
+    offsets.current[d.key] = { x, y };
+    d.el.style.setProperty("--dx", `${x}px`);
+    d.el.style.setProperty("--dy", `${y}px`);
+  }
+
+  function onUp() {
+    const d = drag.current;
+    if (!d) return;
+    d.el.classList.remove("dragging");
+    if (d.moved) {
+      justDragged.current = true;
+      window.setTimeout(() => { justDragged.current = false; }, 0);
+    }
+    drag.current = null;
+  }
+
   // load while this slide is on screen, and again every 20 seconds so new wishes appear
   useEffect(() => {
     if (!active) return;
@@ -77,7 +116,16 @@ export default function WishWall({
       {items.map((it) => (
         <div className="bl" key={it.key} style={balloonStyle(it.key)}>
           <div className="bl-sway">
-            <button type="button" className="bl-body" onClick={() => setRead(it.wish)} aria-label={`Read the wish from ${it.wish.author}`}>
+            <button
+              type="button"
+              className="bl-body"
+              onPointerDown={(e) => onDown(e, it.key)}
+              onPointerMove={onMove}
+              onPointerUp={onUp}
+              onPointerCancel={onUp}
+              onClick={() => { if (!justDragged.current) setRead(it.wish); }}
+              aria-label={`Read the wish from ${it.wish.author}`}
+            >
               <b>{it.wish.author}</b>
               <span>{it.wish.message}</span>
             </button>
@@ -98,9 +146,11 @@ export default function WishWall({
           {failed && <p className="wall-note">Couldn’t load the wishes just now.</p>}
           {loaded && !failed && wishes.length === 0 && <p className="wall-note">No wishes yet. Be the first to send one for Enzo!</p>}
         </div>
-       
+
         {wishes.length > 0 && (
-          <button className="wall-link" type="button" onClick={() => setShowAll(true)}>See all {wishes.length} {wishes.length === 1 ? "wish" : "wishes"}</button>
+          <button className="wall-link" type="button" onClick={() => setShowAll(true)}>
+            See all {wishes.length} {wishes.length === 1 ? "wish" : "wishes"}
+          </button>
         )}
       </div>
 

@@ -321,6 +321,11 @@ a {
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
 @media (prefers-reduced-motion:reduce){.slide.active .slide-body,.nav-next{animation:none}.confetti{display:none}}
 
+/* spacing between the sentences on the confirmation card */
+.done h2{margin-bottom:18px}
+.done p{margin:0 0 16px;line-height:1.55}
+.done p:last-of-type{margin-bottom:6px}
+
 /* slide backgrounds — keep position:absolute from stacked .slide rule above */
 .slide{position:relative;background-size:cover;background-position:center;background-repeat:no-repeat}
 .bg-1{background-color:#ffb200;background-image:url(/slide1-bg-tall.webp)}
@@ -493,6 +498,13 @@ button:focus:not(:focus-visible){outline:none}
   .bl-sway{animation:none}
 }
 
+/* ===== draggable balloons ===== */
+.bl{translate:var(--dx,0) var(--dy,0)}
+.bl-body{touch-action:none;cursor:grab}
+.bl.dragging{z-index:5}
+.bl.dragging,.bl.dragging .bl-sway{animation-play-state:paused}
+.bl.dragging .bl-body{cursor:grabbing}
+
 /* ===== Photo wall like the artifact: blue sky, red-taped polaroids, striped empty frames =====
    Add at the VERY BOTTOM of globals.css (after wish-wall.css). Older polaroid rules can stay or be deleted. */
 
@@ -520,6 +532,14 @@ button:focus:not(:focus-visible){outline:none}
    .pw-cap{position:absolute;left:2%;right:2%;bottom:4%;text-align:center;font:400 clamp(6px,1.9cqw,9px)/1.1 var(--display);color:#15161c}
    .zoom-img{display:block;width:100%;max-height:70dvh;object-fit:contain;margin-bottom:14px;border-radius:6px}
    
+
+   /* ===== 30 polaroids instead of 20: add at the VERY BOTTOM of globals.css ===== */
+  .pw{width:min(100%,520px)}
+  .pw-grid{--cols:5;--rows:6;grid-template-columns:repeat(var(--cols),1fr);grid-template-rows:repeat(var(--rows),1fr);padding:6px 2px 0}
+  @media (min-aspect-ratio:1/1){.pw-grid{--cols:6;--rows:5}}
+  .pw-pol{width:min(calc(100cqw / var(--cols) * .92),calc(100cqh / var(--rows) * .68))}
+  .pw-cap{font-size:clamp(5.5px,1.7cqw,9px)}
+
    /* buttons under the title, so they never cover the photos */
    .wall-actions{top:78px;bottom:auto;flex-direction:row;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px 10px}
    .wall-actions .btn{font-size:1.05rem;padding:.5em 1.1em;box-shadow:0 4px 0 var(--red-d)}
@@ -601,3 +621,61 @@ button:focus:not(:focus-visible){outline:none}
 /* ===== Directions buttons ===== */
 .dir-links{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
 .link.waze{background:#33ccff;color:#15161c}
+
+/* ===== Christening page (first screen) ===== */
+@font-face{font-family:"Childos Arabic";src:url("/fonts/ChildosArabic.ttf") format("truetype");font-display:swap}
+.cx-screen{--cx-font:"Childos Arabic",var(--display),system-ui,sans-serif}
+.cx-screen{--cw:min(100vw,560px,calc(100dvh / 1.41));position:relative;height:100dvh;overflow:hidden;background:linear-gradient(#e0eaf8,#d3e1f3);font-family:var(--body)}
+.cx-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);margin:0}
+
+/* the picture: full width, pinned to the top, bottom edge fades into the sky */
+.cx-card{position:absolute;top:0;left:50%;z-index:1;width:var(--cw);transform:translateX(-50%);-webkit-mask-image:linear-gradient(#000 90%,transparent);mask-image:linear-gradient(#000 90%,transparent)}
+.cx-img{display:block;width:100%;height:auto}
+@media (min-width:561px){.cx-card{border-radius:18px}}
+
+/* buttons: centered at the bottom, sticker-style */
+.cx-actions{position:absolute;left:50%;top:auto;bottom:0;z-index:4;width:var(--cw);transform:translateX(-50%);display:grid;justify-items:center;gap:12px;padding:0 18px calc(28px + env(safe-area-inset-bottom,0px))}
+.cx-dir,.cx-go{font-family:var(--cx-font);font-weight:200;letter-spacing:.02em;text-align:center;cursor:pointer}
+.cx-dir{font-size:1rem;line-height:1.15;color:#2f4a96;text-decoration:none;background:#fff;border:3px solid #2f4a96;border-radius:20px;padding:.6em 1.2em;box-shadow:0 4px 0 #2f4a96;transform:rotate(-2deg);animation:cxwig 3.2s ease-in-out infinite}
+.cx-go{display:inline-flex;align-items:center;justify-content:center;gap:.35em;width:fit-content;max-width:100%;font-size:.88rem;line-height:1.15;color:#2f4a96;background:linear-gradient(#ffe27a,#ffc93c);border:2px solid #2f4a96;border-radius:16px;padding:.5em 1em;box-shadow:0 3px 0 #2f4a96,0 6px 10px rgba(60,90,160,.2);transform:rotate(1.5deg);animation:cxpulse 2.4s ease-in-out infinite}
+.cx-ico{display:inline-block;animation:cxhop 1.6s ease-in-out infinite}
+.cx-go .cx-ico{animation-delay:-.8s}
+.cx-dir:active,.cx-go:active{animation:none;transform:translateY(3px);box-shadow:0 0 0 #2f4a96}
+.cx-go:focus-visible,.cx-dir:focus-visible{outline:3px solid #1d4f91;outline-offset:2px}
+.cx-after{margin:0;font-family:var(--cx-font);font-size:.9rem;line-height:1.3;color:#5f6670;text-align:center}
+@keyframes cxwig{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg) translateY(-1px)}}
+@keyframes cxpulse{0%,100%{transform:rotate(1.5deg) scale(1)}50%{transform:rotate(1.5deg) scale(1.05)}}
+@keyframes cxhop{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px) rotate(-8deg)}}
+/* playful sky on top of the picture; it never blocks taps */
+.cx-fx{position:absolute;inset:0;z-index:2;overflow:hidden;pointer-events:none}
+.cx-below{position:absolute;left:0;right:0;bottom:0;top:calc(var(--cw) * 1.41 - 50px);overflow:hidden}
+.fx-star{position:absolute;left:var(--x);top:var(--y);width:var(--s);aspect-ratio:1;background:linear-gradient(#fbe08f,#efb53f);clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);opacity:.9;animation:fxtw var(--t,3s) ease-in-out infinite,fxbob 6s ease-in-out infinite alternate;animation-delay:var(--dl,0s)}
+@keyframes fxtw{0%,100%{opacity:.95;transform:scale(1) rotate(0)}50%{opacity:.35;transform:scale(.65) rotate(18deg)}}
+@keyframes fxbob{from{translate:0 -8px}to{translate:0 8px}}
+
+.fx-fly{position:absolute;left:0;top:var(--y);animation:fxfly var(--d) linear infinite;animation-delay:var(--dl)}
+@keyframes fxfly{from{transform:translateX(-18vw)}to{transform:translateX(112vw)}}
+.fx-moon{display:block;width:var(--s);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle calc(var(--s) * .42) at 72% 34%,transparent 98%,#f6d27a 100%);box-shadow:0 0 12px rgba(255,214,90,.5);animation:fxbob 4s ease-in-out infinite alternate}
+.fx-sun{display:block;width:46px;filter:drop-shadow(0 0 8px rgba(255,200,60,.6));animation:fxbob 3.5s ease-in-out infinite alternate}
+.fx-rays{transform-origin:30px 30px;animation:fxspin 14s linear infinite}
+@keyframes fxspin{to{transform:rotate(360deg)}}
+
+/* clouds drift slowly from left to right */
+.fx-cloud{position:absolute;left:0;top:var(--y);animation:fxcloud var(--d) linear infinite;animation-delay:var(--dl)}
+.fx-cloud svg{display:block;width:var(--w);opacity:var(--o,.9);filter:drop-shadow(0 6px 8px rgba(80,120,190,.18));animation:fxbob 7s ease-in-out infinite alternate}
+@keyframes fxcloud{from{transform:translateX(-100%)}to{transform:translateX(100vw)}}
+
+.fx-shoot{position:absolute;left:var(--x);top:var(--y);width:110px;height:3px;border-radius:3px;background:linear-gradient(90deg,rgba(255,255,255,0),#fff 70%,#ffe08a);opacity:0;animation:fxshoot 9s ease-in infinite;animation-delay:var(--dl)}
+@keyframes fxshoot{0%{opacity:0;transform:translate(0,0) rotate(24deg)}3%{opacity:1}14%{opacity:0;transform:translate(70vw,32vw) rotate(24deg)}100%{opacity:0;transform:translate(70vw,32vw) rotate(24deg)}}
+
+@media (prefers-reduced-motion:reduce){
+  .fx-star{animation:none}
+  .fx-fly,.fx-shoot,.fx-cloud{display:none}
+  .fx-swing,.cx-dir,.cx-go,.cx-ico{animation:none}
+}
+
+/* hanging baby mobile */
+.fx-swing{position:absolute;top:0;left:var(--x);display:flex;flex-direction:column;align-items:center;transform-origin:50% 0;animation:fxswing var(--d) ease-in-out infinite alternate;animation-delay:var(--dl)}
+.fx-line{display:block;width:2px;height:var(--len);background:rgba(120,150,200,.7)}
+.fx-pend{display:block;width:30px;height:30px;filter:drop-shadow(0 3px 3px rgba(60,90,160,.25))}
+@keyframes fxswing{from{transform:rotate(-7deg)}to{transform:rotate(7deg)}}

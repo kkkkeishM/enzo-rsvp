@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Lilita_One, Nunito } from "next/font/google";
 import "./globals.css";
+import { Kaushan_Script } from "next/font/google";
+
+const script = Kaushan_Script({ weight: "400", subsets: ["latin"], variable: "--font-script" });
+// then add ${script.variable} to the className on <html>
 
 const display = Lilita_One({
   weight: "400",
@@ -30,3 +34,4 @@ export default function RootLayout({
     </html>
   );
 }
+

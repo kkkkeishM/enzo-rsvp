@@ -54,8 +54,8 @@ export const EVENT = {
       },
       {
         emoji: "🧸",
-        title: "Toys & Learning Books (1–2 years old)",
-        text: "Little toys, colorful picture books, and age-appropriate learning materials would be lovely for Enzo’s playtime and growing curiosity.",
+        title: "Building Blocks, Toys & Learning Books (1–2 Years Old)",
+         text: "Colorful building blocks, fun toys, and picture books to support Enzo’s creativity, curiosity, and motor skills as he learns through play.",
       },
       {
         emoji: "💰",
