@@ -672,6 +672,7 @@ button:focus:not(:focus-visible){outline:none}
   .fx-star{animation:none}
   .fx-fly,.fx-shoot,.fx-cloud{display:none}
   .fx-swing,.cx-dir,.cx-go,.cx-ico{animation:none}
+  .cx-deco{animation:none}
 }
 
 /* hanging baby mobile */
@@ -683,15 +684,31 @@ button:focus:not(:focus-visible){outline:none}
 /* baby photos: left side, sized and placed relative to the picture's width (--cw) */
 .cx-photos{position:absolute;top:0;left:50%;z-index:1;width:var(--cw);height:calc(var(--cw) * 1.6);transform:translateX(-50%);pointer-events:none}
 .cx-ph{position:absolute;display:block;height:auto;filter:drop-shadow(0 6px 8px rgba(60,90,160,.25))}
-.cx-ph-round{left:-5%;top:calc(var(--cw) * .10);width:60%;transform:rotate(-2deg);animation:fxbob 6s ease-in-out infinite alternate}
-.cx-ph-pol{left:-4%;top:calc(var(--cw) * .60);width:50%;transform:rotate(2deg);animation:fxbob 5s ease-in-out infinite alternate;animation-delay:-2s}
+.cx-ph-round{left:-5%;top:calc(var(--cw) * -.0);width:60%;transform:rotate(-2deg);animation:fxbob 6s ease-in-out infinite alternate}
+.cx-ph-pol{left:-4%;top:calc(var(--cw) * .50);width:50%;transform:rotate(2deg);animation:fxbob 5s ease-in-out infinite alternate;animation-delay:-2s}
 .cx-ph{animation:none}
 
 @font-face{font-family:"Sweet Apricot";src:url("/fonts/SweetApricot.ttf") format("truetype");font-display:swap}
 
 /* letter: right half, same top as the round photo */
-.cx-letter{position:absolute;top:calc(var(--cw) * .51);left:calc(50% - var(--cw) / 2 + var(--cw) * .488);z-index:3;width:calc(var(--cw) * .49);font-family:"Sweet Apricot","Brush Script MT",cursive;font-size:max(11px,calc(var(--cw) * .03));line-height:1.22;color:#4a6fc4;text-align:justify}
+.cx-letter{position:absolute;top:calc(var(--cw) * .35);left:calc(50% - var(--cw) / 2 + var(--cw) * .488);z-index:3;width:calc(var(--cw) * .49);font-family:"Sweet Apricot","Brush Script MT",cursive;font-size:max(14px,calc(var(--cw) * .042));line-height:1.22;color:#4a6fc4;text-align:justify}
 .cx-letter p{margin:0 0 .9em}
 .cx-letter .cx-hello{text-align:left;margin-bottom:.2em}
 .cx-letter .cx-first{text-indent:1.2em}
 .cx-letter .cx-sign{text-align:left;margin-bottom:0}
+
+/* the photo itself fills its wrapper */
+.cx-pic{display:block;width:100%;height:auto}
+
+/* stickers: positioned as a % of the photo they belong to, so they follow it */
+.cx-deco{position:absolute;height:auto;pointer-events:none;transform:translate(-50%,-50%) rotate(var(--rot,0deg));animation:cxtwinkle 3.2s ease-in-out infinite alternate}
+@keyframes cxtwinkle{to{scale:.82;opacity:.8}}
+
+.cx-d-gold{left:13%;top:19%;width:19%;--rot:-12deg}
+
+.cx-d-b1{left:5%;top:1%;width:15%;--rot:-15deg}
+.cx-d-b2{left:14%;top:-1%;width:12%;--rot:12deg;animation-delay:-1s}
+.cx-d-b3{left:108%;top:49%;width:11%;--rot:8deg;animation-delay:-2s}
+.cx-d-b4{left:103%;top:92%;width:12%;--rot:-10deg;animation-delay:-.6s}
+
+.cx-d-feet{left:13%;top:100%;width:38%;--rot:-6deg;animation:none;opacity:.9}

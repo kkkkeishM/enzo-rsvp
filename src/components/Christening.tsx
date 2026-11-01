@@ -64,11 +64,28 @@ export default function Christening({ onContinue }: { onContinue: () => void }) 
       </div>
 
       {/* baby photos on the left, over the background picture */}
-    <div className="cx-photos" aria-hidden="false">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img className="cx-ph cx-ph-round" src="/christening/baby-round.png" width={254} height={277} alt="Enzo as a newborn" />
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img className="cx-ph cx-ph-pol" src="/christening/baby-polaroid.png" width={268} height={379} alt="Enzo smiling" />
+      <div className="cx-photos">
+      <div className="cx-ph cx-ph-round">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="cx-pic" src="/christening/baby-round.png" width={254} height={277} alt="Enzo as a newborn" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="cx-deco cx-d-gold" src="/christening/star-gold.png" width={160} height={168} alt="" aria-hidden="true" />
+      </div>
+
+      <div className="cx-ph cx-ph-pol">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="cx-pic" src="/christening/baby-polaroid.png" width={268} height={379} alt="Enzo smiling" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="cx-deco cx-d-b1" src="/christening/star-blue.png" width={160} height={150} alt="" aria-hidden="true" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="cx-deco cx-d-b2" src="/christening/star-blue.png" width={160} height={150} alt="" aria-hidden="true" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="cx-deco cx-d-b3" src="/christening/star-blue.png" width={160} height={150} alt="" aria-hidden="true" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="cx-deco cx-d-b4" src="/christening/star-blue.png" width={160} height={150} alt="" aria-hidden="true" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="cx-deco cx-d-feet" src="/christening/footprints.png" width={160} height={174} alt="" aria-hidden="true" />
+      </div>
     </div>
 
     {/* letter from Enzo, right side */}
