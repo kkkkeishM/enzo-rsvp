@@ -1,7 +1,9 @@
 "use client";
 import type { CSSProperties } from "react";
-import { CHRISTENING as c, LETTER, mapsLinkFor } from "@/lib/christening";
+import { CHRISTENING as c, DETAILS, LETTER, greetingFor, directionsLinkFor } from "@/lib/christening";
 import { EVENT } from "@/lib/event";
+import type { Godparent } from "./GodparentName";
+
 
 // x %, y %, size px, twinkle seconds, delay seconds
 const STARS: [number, number, number, number, number][] = [
@@ -52,8 +54,9 @@ const MOBILE: { x: number; len: number; d: number; dl: number; kind: "star" | "m
       </svg>
     );
   }
+  
 
-export default function Christening({ onContinue }: { onContinue: () => void }) {
+  export default function Christening({ onContinue, godparent }: { onContinue: () => void; godparent?: Godparent | null }) {
   return (
     <main className="cx-screen">
       <h1 className="cx-sr">Baptism of our son, Enzo Luan, November 21, 2026</h1>
@@ -90,8 +93,8 @@ export default function Christening({ onContinue }: { onContinue: () => void }) 
 
     {/* letter from Enzo, right side */}
     <article className="cx-letter">
-      <p className="cx-hello">{LETTER.greeting}</p>
-      {LETTER.paragraphs.map((t, i) => (
+        <p className="cx-hello">{greetingFor(godparent)}</p>
+          {LETTER.paragraphs.map((t, i) => (
         <p key={i} className={i === 0 ? "cx-first" : undefined}>{t}</p>
       ))}
       <p className="cx-sign">
@@ -156,7 +159,13 @@ export default function Christening({ onContinue }: { onContinue: () => void }) 
 
       {/* bottom-left, under the picture */}
       <div className="cx-actions">
-      <a className="cx-dir" href={mapsLinkFor(c.mapsQuery)} target="_blank" rel="noopener noreferrer">
+      <div className="cx-info">
+        <p className="cx-row"><span className="cx-ei" aria-hidden="true">📅</span> {DETAILS.date}</p>
+        <p className="cx-row"><span className="cx-ei" aria-hidden="true">🕗</span> {DETAILS.time}</p>
+        <p className="cx-row cx-venue"><span className="cx-ei" aria-hidden="true">⛪</span> {DETAILS.venue}</p>
+        <p className="cx-addr">{DETAILS.address}</p>
+      </div>
+      <a className="cx-dir" href={directionsLinkFor(c.mapsQuery)} target="_blank" rel="noopener noreferrer">
         <span className="cx-ico" aria-hidden="true">📍</span> {c.directionsLabel}
         </a>
         <button type="button" className="cx-go" onClick={onContinue}>

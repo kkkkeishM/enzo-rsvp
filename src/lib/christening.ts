@@ -1,16 +1,38 @@
 // Everything on the christening page lives here.
+
+export type GodparentTitle = "Ninong" | "Ninang";
+
+// Fill this in with your guests. "Ninong" is for boys, "Ninang" is for girls.
+// names = every way the guest might type their name (full name, first name, nickname).
+export const GODPARENTS: { title: GodparentTitle; names: string[] }[] = [
+  { title: "Ninang", names: ["Maria Santos", "Maria"] },
+  { title: "Ninong", names: ["Jose Reyes", "Jose", "Joey"] },
+];
+
+// lowercase, no accents, no punctuation, single spaces, so "José  Reyes." matches "jose reyes"
+const norm = (s: string) =>
+  s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+
+export function findGodparentTitle(name: string): GodparentTitle | null {
+  const n = norm(name);
+  if (!n) return null;
+  const hit = GODPARENTS.find((g) => g.names.some((x) => norm(x) === n));
+  return hit ? hit.title : null;
+}
+
+// "Dear Ninang Maria," or "Dear Ninong Jose,". A name that isn't in the list gets "Dear Ninong/Ninang Name,".
+export const greetingFor = (g?: { title: GodparentTitle | null; name: string } | null) =>
+  g ? `Dear ${g.title ?? "Ninong/Ninang"} ${g.name},` : LETTER.greeting;
 export const CHRISTENING = {
     image: "/christening/invitation.webp", // your invitation picture, in public/christening/
     imageAlt: "Baptism invitation: Please join us for the baptism of our son, Enzo Luan, on November 21, 2026.",
-    mapsQuery: "Makati Cathedral, Makati, Metro Manila", // used for the directions button
+    mapsQuery: "Immaculate Conception Cathedral, Plaza Rizal, Justice Ramon Jabson, Pasig City",
     directionsLabel: "Get directions to the Church",
     continueLabel: "Continue to the birthday celebration",
   };
   
-  export const mapsLinkFor = (query: string) =>
-    `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-      "Immaculate Conception Cathedral, Plaza Rizal, Justice Ramon Jabson, Pasig, 1600 Metro Manila"
-    )}`;
+  export const directionsLinkFor = (query: string) =>
+    `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(query)}&travelmode=driving`;
 
 
     export const LETTER = {
@@ -24,3 +46,12 @@ export const CHRISTENING = {
       closing: "With lots of love,",
       signature: "Enzo Luan ♡",
     };
+
+    export const DETAILS = {
+      date: "Saturday, November 21, 2026",
+      time: "8:00 AM – 11:00 AM",
+      venue: "Immaculate Conception Cathedral",
+      address: "Plaza Rizal, Justice Ramon Jabson, Pasig City",
+    };
+
+   
