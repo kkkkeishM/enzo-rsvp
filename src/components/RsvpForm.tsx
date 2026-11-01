@@ -2,10 +2,13 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { DEFAULT_LIMITS, MAX_ATTENDANCE, MAX_NAME_LENGTH, type InviteInfo } from "@/lib/limits";
+import { displayNameFor } from "@/lib/christening";
+import type { Godparent } from "./GodparentName";
 
 type Piece = { left: number; color: string; dur: number; delay: number };
 type Answer = "yes" | "no";
 const COLORS = ["#e63b2e", "#ffc928", "#1d4f91", "#ffffff", "#15161c"];
+
 
 function Confetti() {
   const [pieces] = useState<Piece[]>(() =>
@@ -90,14 +93,16 @@ function NameList({
 }
 
 export default function RsvpForm({
-  heading, onWrite, wished, onOpenWall,
+  heading, onWrite, wished, onOpenWall, godparent, alreadyRsvped, onDone,
   }: {
     heading?: string;
     onWrite?: (name: string) => void;
     wished?: boolean;
     onOpenWall?: () => void;
+    godparent?: Godparent | null;
+    alreadyRsvped?: boolean;
+    onDone?: () => void;
   }) {
-  const [name, setName] = useState("");
   const [attending, setAttending] = useState<Answer>("yes");
   const [bringAdult, setBringAdult] = useState<Answer>("no");
   const [adults, setAdults] = useState<string[]>([""]);
@@ -112,6 +117,7 @@ export default function RsvpForm({
   const [code, setCode] = useState<string | null>(null);
   const [info, setInfo] = useState<InviteInfo>({ label: null, type: "friend", ...DEFAULT_LIMITS, full: false });
   const [blocked, setBlocked] = useState("");
+  
 
   const lock = useRef(false); // stops double-taps before React re-renders
   const confirmRef = useRef<HTMLButtonElement>(null);
@@ -143,6 +149,8 @@ export default function RsvpForm({
 
   const adultsOk = info.maxAdults >= 1 && info.maxGuests - (1 + kidCount) >= 1;
   const kidsOk = info.maxKids >= 1 && info.maxGuests - (1 + adultCount) >= 1;
+  const name = godparent?.name ?? "";
+  const who = displayNameFor(godparent);  
 
   function chooseAttending(v: Answer) {
     setAttending(v);
@@ -163,7 +171,7 @@ export default function RsvpForm({
 
   function validate(): string {
     if (blocked) return blocked;
-    if (!name.trim()) return "Enter your name so we know who is on the grid.";
+    if (!name.trim()) return "Please go back and enter your name first.";
     if (!going && !notes.trim()) return "Please tell us why you can’t make it.";
     if (!going) return "";
     if (bringAdult === "yes" && adults.some((n) => !n.trim())) return "Enter the full name of your adult guest.";
@@ -210,7 +218,8 @@ export default function RsvpForm({
       }
       setFinalParty(data.party ?? party);
       setConfirming(false);
-      setStatus("done"); // lock stays on: no second submission
+      setStatus("done");
+      onDone?.(); // lock stays on: no second submission
     } catch {
       setError("Oops, that didn’t go through. Please try again.");
       setConfirming(false);
@@ -219,16 +228,29 @@ export default function RsvpForm({
     }
   }
 
+  if (alreadyRsvped && status !== "done") {
+    return (
+      <div className="done" role="status">
+        <h2>You’re all set! 🏁</h2>
+        <p>We already have your RSVP, so there’s nothing more to do.</p>
+        {wished
+          ? onOpenWall && <button type="button" className="btn wish-btn" onClick={onOpenWall}>See the wish wall🖼️</button>
+          : onWrite && <button type="button" className="btn wish-btn" onClick={() => onWrite(name.trim())}>Write a birthday wish🌠</button>}
+      </div>
+    );
+  }
+
   if (status === "done") {
     const first = name.trim().split(" ")[0];
+    const short = [godparent?.title, first].filter(Boolean).join(" ");  
     return (
       <div className="done" role="status">
         {going && <Confetti />}
-        <h2>{going ? "Buckle Up, We're celebrating!" : `No worries, ${first}! ❤️`}</h2>
+        <h2>{going ? "Buckle Up, We're celebrating!" : `No worries, ${who}! ❤️`}</h2>
 
         {going ? (
           <p>
-            {`Thanks, ${first}. We saved ${finalParty} ${finalParty === 1 ? "spot" : "spots"} for your crew. See you at the track!`}
+            {`Thanks, ${who}. We saved ${finalParty} ${finalParty === 1 ? "spot" : "spots"} for your crew. See you at the track!`}
           </p>
         ) : (
           <>
@@ -267,10 +289,7 @@ export default function RsvpForm({
         {blocked && <p className="err" role="alert">{blocked}</p>}
         {info.full && <p className="rsvp-note">The party is almost full, so new spots may no longer be available.</p>}
 
-        <div>
-          <label htmlFor="rsvp-name">Your name</label>
-          <input id="rsvp-name" type="text" autoComplete="name" placeholder="Full name" maxLength={MAX_NAME_LENGTH} value={name} onChange={(e) => setName(e.target.value)} />
-        </div>
+        {who && <p className="name-line">Hi, <b>{who}</b> ♡</p>}
 
         <div>
           <span className="legend" id="rsvp-legend">Will you be there?</span>
@@ -336,7 +355,7 @@ export default function RsvpForm({
             <div className="modal" role="dialog" aria-modal="true" aria-labelledby="cf-title" onClick={(e) => e.stopPropagation()}>
               <h3 id="cf-title">Confirm your RSVP</h3>
               <ul className="modal-list">
-                <li><b>Name:</b> {name.trim()}</li>
+                <li><b>Name:</b> {who || name.trim()}</li>
                 {going ? (
                   <>
                     <li><b>Adult guest{adultCount > 1 ? "s" : ""}:</b> {adultCount ? adults.map((n) => n.trim()).join(", ") : "None"}</li>

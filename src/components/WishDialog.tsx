@@ -1,19 +1,25 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { displayNameFor } from "@/lib/christening";
+import type { Godparent } from "./GodparentName";
 
 const MAX_MESSAGE = 280;
-const MAX_AUTHOR = 40;
+const MAX_AUTHOR = 60;
 
 export default function WishDialog({
-  open, initialName, onClose, onSent,
+  open, initialName, godparent, onClose, onSent,
 }: {
   open: boolean;
   initialName: string;
+  godparent?: Godparent | null;
   onClose: () => void;
   onSent: (pending: boolean) => void;
 }) {
-  const [author, setAuthor] = useState(initialName);
+  const locked = displayNameFor(godparent); // "" when unknown
+  const startName = locked || initialName;
+
+  const [author, setAuthor] = useState(startName);
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
@@ -22,11 +28,11 @@ export default function WishDialog({
 
   useEffect(() => {
     if (!open) return;
-    setAuthor(initialName);
+    setAuthor(startName);
     setError("");
     const t = window.setTimeout(() => msgRef.current?.focus(), 60);
     return () => window.clearTimeout(t);
-  }, [open, initialName]);
+  }, [open, startName]);
 
   if (!open) return null;
 
@@ -65,14 +71,20 @@ export default function WishDialog({
       onClick={() => { if (!lock.current) onClose(); }}
       onKeyDown={(e) => {
         if (e.key === "Escape" && !lock.current) onClose();
-        e.stopPropagation(); // keep arrow keys from changing slides behind the dialog
+        e.stopPropagation();
       }}
     >
       <form className="modal wish-form" role="dialog" aria-modal="true" aria-labelledby="wish-title" onClick={(e) => e.stopPropagation()} onSubmit={send} noValidate>
         <h3 id="wish-title">Birthday wish for Enzo 🎈</h3>
 
-        <label htmlFor="wish-author">Your name</label>
-        <input id="wish-author" type="text" maxLength={MAX_AUTHOR} autoComplete="name" value={author} onChange={(e) => setAuthor(e.target.value)} />
+        {locked ? (
+          <p className="name-line">From <b>{locked}</b></p>
+        ) : (
+          <>
+            <label htmlFor="wish-author">Your name</label>
+            <input id="wish-author" type="text" maxLength={MAX_AUTHOR} autoComplete="name" value={author} onChange={(e) => setAuthor(e.target.value)} />
+          </>
+        )}
 
         <label htmlFor="wish-message">Your wish</label>
         <textarea id="wish-message" ref={msgRef} rows={4} maxLength={MAX_MESSAGE} placeholder="Happy 1st birthday, Enzo!" value={message} onChange={(e) => setMessage(e.target.value)} />

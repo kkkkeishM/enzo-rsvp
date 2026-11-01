@@ -20,6 +20,8 @@ export default function Home() {
   const [wipe, setWipe] = useState<WipePhase>("idle");
   const [variant, setVariant] = useState<Variant>("check");
   const [godparent, setGodparent] = useState<Godparent | null>(null);
+  const [rsvped, setRsvped] = useState(false);
+  const [wished, setWished] = useState(false);
 
   function goTo(next: Screen, v: Variant = "check") {
     if (wipe !== "idle") return; // ignore taps while a transition is running
@@ -56,7 +58,7 @@ export default function Home() {
         />
       )}
       {screen === "christening" && (
-        <Christening godparent={godparent} onContinue={() => goTo("envelope", "smoke")} />
+        <Christening godparent={godparent} onContinue={() => goTo(rsvped ? "invite" : "envelope", "smoke")} />
       )}
       {screen === "envelope" && (
         <>
@@ -64,8 +66,22 @@ export default function Home() {
           <BackButton onClick={() => goTo("christening", "smokeback")} label="Back" />
         </>
       )}
+      {screen === "cover" && (
+        <Cover onEnter={() => goTo("invite")} onBack={() => goTo("envelope")} />
+      )}
+      {screen === "invite" && (
+        <Invitation
+          onBack={() => goTo("cover")}
+          godparent={godparent}
+          alreadyRsvped={rsvped}
+          alreadyWished={wished}
+          onRsvped={() => setRsvped(true)}
+          onWished={() => setWished(true)}
+          onChristening={() => goTo("christening", "smokeback")}
+        />
+      )}
       {screen === "cover" && <Cover onEnter={() => goTo("invite")} onBack={() => goTo("envelope")} />}
-      {screen === "invite" && <Invitation onBack={() => goTo("cover")} />}
+      {screen === "invite" && <Invitation onBack={() => goTo("cover")} godparent={godparent} />}
     </>
   );
 }

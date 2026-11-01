@@ -6,6 +6,8 @@ import RsvpForm from "./RsvpForm";
 import WishDialog from "./WishDialog";
 import WishWall from "./WishWall";
 import { EVENT, GIFTS, googleDirections, wazeDirections } from "@/lib/event";
+import type { Godparent } from "./GodparentName";
+import { House } from "lucide-react";
 
 const LAST = 4;
 
@@ -15,17 +17,29 @@ const Arrow = ({ dir }: { dir: "left" | "right" }) => (
   </svg>
 );
 
-export default function Invitation({ onBack }: { onBack: () => void }) {
-  const [i, setI] = useState(0);
+export default function Invitation({
+  onBack, godparent, alreadyRsvped, alreadyWished, onRsvped, onWished, onChristening,
+}: {
+  onBack: () => void;
+  godparent?: Godparent | null;
+  alreadyRsvped?: boolean;
+  alreadyWished?: boolean;
+  onRsvped?: () => void;
+  onWished?: () => void;
+  onChristening?: () => void;
+}) {
+  const [i, setI] = useState(alreadyRsvped ? 4 : 0);
   const touchX = useRef<number | null>(null);
   const [giftOpen, setGiftOpen] = useState(false);
   const [wallIntroDone, setWallIntroDone] = useState(false);
   const finishIntro = useCallback(() => setWallIntroDone(true), []);
   const [wish, setWish] = useState<{ open: boolean; name: string }>({ open: false, name: "" });
   const [wallKey, setWallKey] = useState(0);
-  const [wished, setWished] = useState(false);
+  const [wished, setWished] = useState(!!alreadyWished);
   const [wallNote, setWallNote] = useState("");
-  const [wallOpen, setWallOpen] = useState(false);
+  const [wallOpen, setWallOpen] = useState(!!alreadyRsvped);
+  
+  
   
   
 
@@ -158,11 +172,14 @@ export default function Invitation({ onBack }: { onBack: () => void }) {
         <section {...sp(3)}>
           <div className="slide-body">
           <RsvpForm
-              heading="Be Part of the Fun"
-              onWrite={(name) => setWish({ open: true, name })}
-              wished={wished}
-              onOpenWall={() => { setWallOpen(true); setI(4); }}
-            />
+            heading="Be Part of the Fun"
+            godparent={godparent}
+            alreadyRsvped={alreadyRsvped}
+            onDone={onRsvped}
+            onWrite={(name) => setWish({ open: true, name })}
+            wished={wished}
+            onOpenWall={() => { setWallOpen(true); setI(4); }}
+          />
           </div>
         </section>
 
@@ -199,6 +216,15 @@ export default function Invitation({ onBack }: { onBack: () => void }) {
         {i < LAST && i !== 3 ? (
           <button className="nav-next" type="button" onClick={next}>
             Next <Arrow dir="right" />
+          </button>
+        ) : i === LAST && onChristening ? (
+          <button
+            className="nav-next nav-home"
+            type="button"
+            onClick={onChristening}
+            aria-label="Go to home"
+          >
+            <House size={22} strokeWidth={2.5} />
           </button>
         ) : (
           <span />
@@ -254,10 +280,12 @@ export default function Invitation({ onBack }: { onBack: () => void }) {
       <WishDialog
         open={wish.open}
         initialName={wish.name}
+        godparent={godparent}
         onClose={() => setWish({ open: false, name: "" })}
         onSent={(pending) => {
           setWallOpen(true); setI(4);
-          setWished(true);
+          onWished?.();
+          setWallOpen(true); setI(4);
           setWish({ open: false, name: "" });
           setWallNote(pending ? "Thank you! Your wish will float up once it’s approved." : "");
           setWallKey((k) => k + 1);

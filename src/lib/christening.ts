@@ -59,4 +59,5 @@ export const greetingFor = (g?: { title: GodparentTitle | null; name: string } |
       address: "Plaza Rizal, Justice Ramon Jabson, Pasig City",
     };
 
-   
+    export const displayNameFor = (g?: { title: GodparentTitle | null; name: string } | null) =>
+      g ? [g.title, g.name].filter(Boolean).join(" ") : "";
