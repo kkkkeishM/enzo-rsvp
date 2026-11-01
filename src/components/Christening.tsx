@@ -1,6 +1,6 @@
 "use client";
 import type { CSSProperties } from "react";
-import { CHRISTENING as c, mapsLinkFor } from "@/lib/christening";
+import { CHRISTENING as c, LETTER, mapsLinkFor } from "@/lib/christening";
 import { EVENT } from "@/lib/event";
 
 // x %, y %, size px, twinkle seconds, delay seconds
@@ -62,6 +62,27 @@ export default function Christening({ onContinue }: { onContinue: () => void }) 
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className="cx-img" src={c.image} width={1000} height={1410} alt={c.imageAlt} />
       </div>
+
+      {/* baby photos on the left, over the background picture */}
+    <div className="cx-photos" aria-hidden="false">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img className="cx-ph cx-ph-round" src="/christening/baby-round.png" width={254} height={277} alt="Enzo as a newborn" />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img className="cx-ph cx-ph-pol" src="/christening/baby-polaroid.png" width={268} height={379} alt="Enzo smiling" />
+    </div>
+
+    {/* letter from Enzo, right side */}
+    <article className="cx-letter">
+      <p className="cx-hello">{LETTER.greeting}</p>
+      {LETTER.paragraphs.map((t, i) => (
+        <p key={i} className={i === 0 ? "cx-first" : undefined}>{t}</p>
+      ))}
+      <p className="cx-sign">
+        {LETTER.closing}
+        <br />
+        {LETTER.signature}
+      </p>
+    </article>
 
       {/* playful sky: clouds, twinkling stars, a flying sun and moons, shooting stars */}
       <div className="cx-fx" aria-hidden="true">

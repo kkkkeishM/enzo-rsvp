@@ -11,3 +11,16 @@ export const CHRISTENING = {
     `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
       "Immaculate Conception Cathedral, Plaza Rizal, Justice Ramon Jabson, Pasig, 1600 Metro Manila"
     )}`;
+
+
+    export const LETTER = {
+      greeting: "Dear Ninong/Ninang,",
+      paragraphs: [
+        "It’s me, Enzo! I have a very special day coming up, and I would be so happy to have you be part of it!",
+        "I’m getting ready for my baptism, and having you by my side would make the day even more meaningful.",
+        "As I grow, I hope you’ll guide me, keep me in your prayers, teach me good things, and shower me with lots of love.",
+        "Will you join me and my family on this very special day? I can’t wait to see you!",
+      ],
+      closing: "With lots of love,",
+      signature: "Enzo Luan ♡",
+    };
