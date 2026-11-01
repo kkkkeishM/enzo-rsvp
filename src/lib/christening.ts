@@ -23,17 +23,22 @@ export function findGodparentTitle(name: string): GodparentTitle | null {
 // "Dear Ninang Maria," or "Dear Ninong Jose,". A name that isn't in the list gets "Dear Ninong/Ninang Name,".
 export const greetingFor = (g?: { title: GodparentTitle | null; name: string } | null) =>
   g ? `Dear ${g.title ?? "Ninong/Ninang"} ${g.name},` : LETTER.greeting;
-export const CHRISTENING = {
-    image: "/christening/invitation.webp", // your invitation picture, in public/christening/
+
+  
+  export const CHRISTENING = {
+    image: "/christening/invitation.webp",
     imageAlt: "Baptism invitation: Please join us for the baptism of our son, Enzo Luan, on November 21, 2026.",
     mapsQuery: "Immaculate Conception Cathedral, Plaza Rizal, Justice Ramon Jabson, Pasig City",
-    directionsLabel: "Get directions to the Church",
+    directionsLabel: "Google Maps",
+    wazeLabel: "Waze",
     continueLabel: "Continue to the birthday celebration",
   };
   
   export const directionsLinkFor = (query: string) =>
     `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(query)}&travelmode=driving`;
-
+  
+  export const wazeLinkFor = (query: string) =>
+    `https://waze.com/ul?q=${encodeURIComponent(query)}&navigate=yes`;
 
     export const LETTER = {
       greeting: "Dear Ninong/Ninang,",

@@ -1,6 +1,6 @@
 "use client";
 import type { CSSProperties } from "react";
-import { CHRISTENING as c, DETAILS, LETTER, greetingFor, directionsLinkFor } from "@/lib/christening";
+import { CHRISTENING as c, DETAILS, LETTER, greetingFor, directionsLinkFor, wazeLinkFor } from "@/lib/christening";
 import { EVENT } from "@/lib/event";
 import type { Godparent } from "./GodparentName";
 
@@ -165,9 +165,14 @@ const MOBILE: { x: number; len: number; d: number; dl: number; kind: "star" | "m
         <p className="cx-row cx-venue"><span className="cx-ei" aria-hidden="true">⛪</span> {DETAILS.venue}</p>
         <p className="cx-addr">{DETAILS.address}</p>
       </div>
-      <a className="cx-dir" href={directionsLinkFor(c.mapsQuery)} target="_blank" rel="noopener noreferrer">
-        <span className="cx-ico" aria-hidden="true">📍</span> {c.directionsLabel}
-        </a>
+      <div className="cx-dirs">
+          <a className="cx-dir" href={directionsLinkFor(c.mapsQuery)} target="_blank" rel="noopener noreferrer">
+            <span className="cx-ico" aria-hidden="true">📍</span> {c.directionsLabel}
+          </a>
+          <a className="cx-dir cx-dir-waze" href={wazeLinkFor(c.mapsQuery)} target="_blank" rel="noopener noreferrer">
+            <span className="cx-ico" aria-hidden="true">🚗</span> {c.wazeLabel}
+          </a>
+        </div>
         <button type="button" className="cx-go" onClick={onContinue}>
         <span className="cx-ico" aria-hidden="true">🎂</span> {c.continueLabel} <span aria-hidden="true">›</span>
         </button>

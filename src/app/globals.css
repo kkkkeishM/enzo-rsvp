@@ -675,6 +675,41 @@ button:focus:not(:focus-visible){outline:none}
   .cx-deco{animation:none}
 }
 
+.cx-dirs {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  width: 100%;
+}
+
+.cx-dirs .cx-dir {
+  flex: 1 1 0;
+  min-width: 0;          /* lets the buttons shrink instead of overflowing */
+  width: auto;           /* overrides any width: 100% on .cx-dir */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+  white-space: nowrap;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+@media (max-width: 380px) {
+  .cx-dirs .cx-dir {
+    font-size: 0.85rem;
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+}
+
+.cx-dir-waze {
+  /* e.g. Waze-ish blue */
+  background: #33ccff;
+  color: #05345a;
+}
+
 /* hanging baby mobile */
 .fx-swing{position:absolute;top:0;left:var(--x);display:flex;flex-direction:column;align-items:center;transform-origin:50% 0;animation:fxswing var(--d) ease-in-out infinite alternate;animation-delay:var(--dl)}
 .fx-line{display:block;width:2px;height:var(--len);background:rgba(120,150,200,.7)}
@@ -785,7 +820,7 @@ button:focus:not(:focus-visible){outline:none}
 .sw-rev .sw-carimg{transform:none}
 
 /* event details card above the buttons */
-.cx-info{width:100%;max-width:340px;margin-bottom:22px;background:rgba(255,255,255,.88);border:3px solid #2f4a96;border-radius:18px;padding:.55em .9em .6em;box-shadow:0 4px 0 #2f4a96;text-align:center;font-family:var(--cx-font);color:#2f4a96;transform:rotate(-1deg)}
+.cx-info{width:100%;max-width:340px;background:rgba(255,255,255,.88);border:3px solid #2f4a96;border-radius:18px;padding:.55em .9em .6em;box-shadow:0 4px 0 #2f4a96;text-align:center;font-family:var(--cx-font);color:#2f4a96;transform:rotate(-1deg)}
 .cx-row{margin:0;display:flex;align-items:center;justify-content:center;gap:.4em;font-size:1rem;line-height:1.4}
 .cx-venue{font-size:1.1rem}
 .cx-addr{margin:.1em 0 0;font-size:.82rem;line-height:1.25;color:#5f6fa0}
