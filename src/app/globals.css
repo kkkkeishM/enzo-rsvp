@@ -658,7 +658,7 @@ button:focus:not(:focus-visible){outline:none}
 @keyframes cxpulse{0%,100%{transform:rotate(1.5deg) scale(1)}50%{transform:rotate(1.5deg) scale(1.05)}}
 @keyframes cxhop{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px) rotate(-8deg)}}
 /* playful sky on top of the picture; it never blocks taps */
-.cx-fx{position:absolute;inset:0;z-index:2;overflow:hidden;pointer-events:none}
+.cx-fx{position:absolute;inset:0;z-index:1;overflow:hidden;pointer-events:none}
 .cx-below{position:absolute;left:0;right:0;bottom:0;top:calc(var(--cw) * 1.41 - 50px);overflow:hidden}
 .fx-star{position:absolute;left:var(--x);top:var(--y);width:var(--s);aspect-ratio:1;background:linear-gradient(#fbe08f,#efb53f);clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);opacity:.9;animation:fxtw var(--t,3s) ease-in-out infinite,fxbob 6s ease-in-out infinite alternate;animation-delay:var(--dl,0s)}
 @keyframes fxtw{0%,100%{opacity:.95;transform:scale(1) rotate(0)}50%{opacity:.35;transform:scale(.65) rotate(18deg)}}
@@ -728,16 +728,16 @@ button:focus:not(:focus-visible){outline:none}
 @keyframes fxswing{from{transform:rotate(-7deg)}to{transform:rotate(7deg)}}
 
 /* baby photos: left side, sized and placed relative to the picture's width (--cw) */
-.cx-photos{position:absolute;top:0;left:50%;z-index:1;width:var(--cw);height:calc(var(--cw) * 1.6);transform:translateX(-50%);pointer-events:none}
+.cx-photos{position:absolute;top:0;left:50%;z-index:2;width:var(--cw);height:calc(var(--cw) * 1.6);transform:translateX(-50%);pointer-events:none}
 .cx-ph{position:absolute;display:block;height:auto;filter:drop-shadow(0 6px 8px rgba(60,90,160,.25))}
-.cx-ph-round{left:-5%;top:calc(var(--cw) * -.0);width:60%;transform:rotate(-2deg);animation:fxbob 6s ease-in-out infinite alternate}
-.cx-ph-pol{left:-4%;top:calc(var(--cw) * .50);width:50%;transform:rotate(2deg);animation:fxbob 5s ease-in-out infinite alternate;animation-delay:-2s}
+.cx-ph-round{left:-5%;top:calc(var(--cw) * -.1);width:60%;transform:rotate(-2deg);animation:fxbob 6s ease-in-out infinite alternate}
+.cx-ph-pol{left:-4%;top:calc(var(--cw) * .42);width:50%;transform:rotate(2deg);animation:fxbob 5s ease-in-out infinite alternate;animation-delay:-2s}
 .cx-ph{animation:none}
 
 @font-face{font-family:"Sweet Apricot";src:url("/fonts/SweetApricot.ttf") format("truetype");font-display:swap;unicode-range:U+0020,U+0041-005A,U+0061-007A,U+00C0-017F}
 
 /* letter: right half, same top as the round photo */
-.cx-letter{position:absolute;top:calc(var(--cw) * .35);left:calc(50% - var(--cw) / 2 + var(--cw) * .488);z-index:3;width:calc(var(--cw) * .49);font-family:"Sweet Apricot",var(--body),system-ui,sans-serif;font-size:max(14px,calc(var(--cw) * .042));line-height:1.22;color:#4a6fc4;text-align:justify}
+.cx-letter{position:absolute;top:calc(var(--cw) * .27);left:calc(50% - var(--cw) / 2 + var(--cw) * .488);z-index:3;width:calc(var(--cw) * .49);font-family:"Sweet Apricot",var(--body),system-ui,sans-serif;font-size:max(14px,calc(var(--cw) * .042));line-height:1.22;color:#4a6fc4;text-align:justify}
 .cx-letter p{margin:0 0 .9em}
 .cx-letter .cx-hello{text-align:left;margin-bottom:.3em;font-weight:700;font-size:1.4em;line-height:1.15}
 .cx-letter .cx-first{text-indent:1.2em}
