@@ -30,7 +30,7 @@ export default function WishDialog({
     if (!open) return;
     setAuthor(startName);
     setError("");
-    const t = window.setTimeout(() => msgRef.current?.focus(), 60);
+    const t = window.setTimeout(() => msgRef.current?.focus({ preventScroll: true }), 60);
     return () => window.clearTimeout(t);
   }, [open, startName]);
 

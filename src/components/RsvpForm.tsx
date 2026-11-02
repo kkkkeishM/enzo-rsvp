@@ -138,7 +138,7 @@ export default function RsvpForm({
   }, []);
 
   useEffect(() => {
-    if (confirming) confirmRef.current?.focus();
+    if (confirming) confirmRef.current?.focus({ preventScroll: true });
   }, [confirming]);
 
   const going = attending === "yes";

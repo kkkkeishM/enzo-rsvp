@@ -77,11 +77,19 @@ export default function Invitation({
     "aria-hidden": i !== n,
   });
 
- 
+  const screenRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    document.body.classList.add("invite-lock");
+    return () => document.body.classList.remove("invite-lock");
+  }, []);
+  
 
   return (
     <main
+      ref={screenRef}
       className="invite-screen"
+      onScroll={(e) => { e.currentTarget.scrollTop = 0; e.currentTarget.scrollLeft = 0; }}
       onTouchStart={(e) => { touchX.current = e.touches[0].clientX; }}
       onTouchEnd={(e) => {
         if (touchX.current === null) return;
@@ -91,7 +99,7 @@ export default function Invitation({
         if (dx > 60 && i > 0) prev();
       }}
     >
-      <div className="slides" style={{ transform: `translateX(-${i * 100}%)` }}>
+      <div className="slides">
         {/* Slide 1: welcome + schedule */}
         <section {...sp(0)}>
           <div className="slide-body combo">
