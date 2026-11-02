@@ -208,8 +208,8 @@ a {
 .env-flags{width:calc(var(--ew) * var(--flag))}
 
 /* playful back button */
-.back-btn{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));z-index:20;display:flex;align-items:center;gap:.4em;font:400 1.1rem/1 var(--display);color:#15161c;background:linear-gradient(#ffd54a,#ffc928 60%,#f0b400);border:3px solid #15161c;border-radius:999px;padding:.35em .95em .35em .4em;box-shadow:0 4px 0 #15161c,0 10px 14px rgba(0,0,0,.25);cursor:pointer;transform:rotate(-3deg);transition:transform .15s,box-shadow .15s}
-.back-btn svg{width:1.8em;height:1.8em;padding:.3em;background:#e63b2e;border:2px solid #15161c;border-radius:50%;fill:none;stroke:#fff;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round;animation:nudge 1s ease-in-out infinite}
+.back-btn{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));z-index:20;display:flex;align-items:center;gap:.4em;font:200 1.1rem/1 var(--display);color:#15161c;background:linear-gradient(#ffd54a,#ffc928 60%,#f0b400);border:3px solid #15161c;border-radius:999px;padding:.35em .95em .35em .4em;box-shadow:0 4px 0 #15161c,0 10px 14px rgba(0,0,0,.25);cursor:pointer;transform:rotate(-3deg);transition:transform .15s,box-shadow .15s}
+.back-btn svg{width:1.7em;height:1.5em;padding:.3em;background:#e63b2e;border:2px solid #15161c;border-radius:50%;fill:none;stroke:#fff;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round;animation:nudge 1s ease-in-out infinite}
 @keyframes nudge{50%{transform:translateX(-3px)}}
 .back-btn:hover{transform:rotate(2deg) translateY(-2px) scale(1.06)}
 .back-btn:active{transform:translateY(3px);box-shadow:0 1px 0 #15161c,0 4px 6px rgba(0,0,0,.25)}
