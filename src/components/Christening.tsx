@@ -1,5 +1,6 @@
 "use client";
-import type { CSSProperties } from "react";
+import { useState, type CSSProperties } from "react";
+import { createPortal } from "react-dom";
 import { CHRISTENING as c, DETAILS, LETTER, greetingFor, directionsLinkFor, wazeLinkFor } from "@/lib/christening";
 import { EVENT } from "@/lib/event";
 import type { Godparent } from "./GodparentName";
@@ -57,6 +58,7 @@ const MOBILE: { x: number; len: number; d: number; dl: number; kind: "star" | "m
   
 
   export default function Christening({ onContinue, godparent }: { onContinue: () => void; godparent?: Godparent | null }) {
+  const [dirOpen, setDirOpen] = useState(false);
   return (
     <main className="cx-screen">
       <h1 className="cx-sr">Baptism of our son, Enzo Luan, November 21, 2026</h1>
@@ -159,25 +161,46 @@ const MOBILE: { x: number; len: number; d: number; dl: number; kind: "star" | "m
 
       {/* bottom-left, under the picture */}
       <div className="cx-actions">
-      <div className="cx-info">
-        <p className="cx-row"><span className="cx-ei" aria-hidden="true">📅</span> {DETAILS.date}</p>
-        <p className="cx-row"><span className="cx-ei" aria-hidden="true">🕗</span> {DETAILS.time}</p>
-        <p className="cx-row cx-venue"><span className="cx-ei" aria-hidden="true">⛪</span> {DETAILS.venue}</p>
-        <p className="cx-addr">{DETAILS.address}</p>
-      </div>
-      <div className="cx-dirs">
-          <a className="cx-dir" href={directionsLinkFor(c.mapsQuery)} target="_blank" rel="noopener noreferrer">
-            <span className="cx-ico" aria-hidden="true">📍</span> {c.directionsLabel}
-          </a>
-          <a className="cx-dir cx-dir-waze" href={wazeLinkFor(c.mapsQuery)} target="_blank" rel="noopener noreferrer">
-            <span className="cx-ico" aria-hidden="true">🚗</span> {c.wazeLabel}
-          </a>
-        </div>
+      <button type="button" className="cx-info" onClick={() => setDirOpen(true)} aria-haspopup="dialog">
+        <span className="cx-row"><span className="cx-ei" aria-hidden="true">📅</span> {DETAILS.date}</span>
+        <span className="cx-row"><span className="cx-ei" aria-hidden="true">🕗</span> {DETAILS.time}</span>
+        <span className="cx-row cx-venue"><span className="cx-ei" aria-hidden="true">⛪</span> {DETAILS.venue}</span>
+        <span className="cx-addr">{DETAILS.address}</span>
+        <span className="cx-tap">
+          <span className="cx-ico" aria-hidden="true">📍</span> Tap for directions <span aria-hidden="true">›</span>
+        </span>
+      </button>
         <button type="button" className="cx-go" onClick={onContinue}>
         <span className="cx-ico" aria-hidden="true">🎂</span> {c.continueLabel} <span aria-hidden="true">›</span>
         </button>
         <p className="cx-after">We look forward to sharing this special day with you.</p>
       </div>
+      {dirOpen &&
+        createPortal(
+          <div
+            className="modal-back"
+            onClick={() => setDirOpen(false)}
+            onKeyDown={(e) => { if (e.key === "Escape") setDirOpen(false); e.stopPropagation(); }}
+          >
+            <div className="modal cx-modal" role="dialog" aria-modal="true" aria-labelledby="cx-dir-title" onClick={(e) => e.stopPropagation()}>
+              <h3 id="cx-dir-title">Get directions</h3>
+              <p className="cx-modal-venue">{DETAILS.venue}</p>
+              <p className="cx-modal-addr">{DETAILS.address}</p>
+              <div className="cx-dirs">
+                <a className="cx-dir" href={directionsLinkFor(c.mapsQuery)} target="_blank" rel="noopener noreferrer">
+                  <span className="cx-ico" aria-hidden="true">📍</span> {c.directionsLabel}
+                </a>
+                <a className="cx-dir cx-dir-waze" href={wazeLinkFor(c.mapsQuery)} target="_blank" rel="noopener noreferrer">
+                  <span className="cx-ico" aria-hidden="true">🚗</span> {c.wazeLabel}
+                </a>
+              </div>
+              <div className="modal-actions">
+                <button type="button" className="btn-sm alt" autoFocus onClick={() => setDirOpen(false)}>Close</button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
     </main>
   );
 }

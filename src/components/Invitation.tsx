@@ -84,6 +84,9 @@ export default function Invitation({
     return () => document.body.classList.remove("invite-lock");
   }, []);
   
+  useEffect(() => {
+    if (alreadyWished) setWished(true);
+  }, [alreadyWished]);
 
   return (
     <main
@@ -291,7 +294,7 @@ export default function Invitation({
         godparent={godparent}
         onClose={() => setWish({ open: false, name: "" })}
         onSent={(pending) => {
-          setWallOpen(true); setI(4);
+          setWished(true); 
           onWished?.();
           setWallOpen(true); setI(4);
           setWish({ open: false, name: "" });

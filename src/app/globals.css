@@ -841,3 +841,84 @@ button:focus:not(:focus-visible){outline:none}
 
 /* stop the page behind the invitation from scrolling */
 body.invite-lock{position:fixed;inset:0;width:100%;overflow:hidden;overscroll-behavior:none}
+
+/* info card is now a button */
+button.cx-info{display:block;font:inherit;cursor:pointer;-webkit-appearance:none;appearance:none;transition:transform .12s,box-shadow .12s}
+button.cx-info:active{transform:rotate(-1deg) translateY(3px);box-shadow:0 1px 0 #2f4a96}
+button.cx-info:focus-visible{outline:3px solid #1d4f91;outline-offset:3px}
+.cx-addr{display:block}
+.cx-tap{display:block;margin-top:.45em;font-size:.78rem;color:#2f4a96;text-decoration:underline;text-underline-offset:2px}
+
+/* directions modal (it renders on <body>, so it needs its own font variable) */
+.cx-modal{--cx-font:"Childos Arabic",var(--display),system-ui,sans-serif;font-family:var(--cx-font);color:#2f4a96;border-color:#2f4a96;box-shadow:0 8px 0 #2f4a96;text-align:center}
+.cx-modal h3{font-family:var(--cx-font);font-weight:400;font-size:1.5rem;margin:0 0 8px}
+.cx-modal-venue{margin:0;font-size:1.1rem}
+.cx-modal-addr{margin:.2em 0 16px;font-size:.85rem;color:#5f6fa0}
+.cx-modal .cx-dirs{margin-bottom:14px}
+.cx-modal .modal-actions{justify-content:center}
+
+/* use the christening font on the info button and remove the underline */
+button.cx-info{
+  font-family:var(--cx-font);
+  color:#2f4a96;
+}
+button.cx-info .cx-row,
+button.cx-info .cx-addr,
+button.cx-info .cx-tap{
+  font-family:var(--cx-font);
+}
+.cx-tap{
+  text-decoration:none;
+}
+
+.cx-tap{
+  text-decoration:none;
+  color:#5f6fa0;
+  font-size:.8rem;
+}
+
+/* info card that feels like a real button */
+button.cx-info{
+  position:relative;
+  font-family:var(--cx-font);
+  color:#2f4a96;
+  background:linear-gradient(#ffffff,#e9f1fd);
+  border:3px solid #2f4a96;
+  border-radius:20px;
+  padding:.6em .9em .7em;
+  box-shadow:0 5px 0 #2f4a96,0 10px 14px rgba(60,90,160,.22);
+  transform:rotate(-1deg);
+  cursor:pointer;
+  animation:cxbtn 2.6s ease-in-out infinite;
+  -webkit-tap-highlight-color:transparent;
+}
+@keyframes cxbtn{
+  0%,100%{transform:rotate(-1deg) scale(1)}
+  50%{transform:rotate(-1deg) scale(1.025)}
+}
+button.cx-info:active{
+  animation:none;
+  transform:rotate(-1deg) translateY(4px);
+  box-shadow:0 1px 0 #2f4a96,0 3px 6px rgba(60,90,160,.2);
+}
+
+/* the hint becomes a small yellow pill, like a call-to-action */
+button.cx-info .cx-tap{
+  display:inline-flex;
+  align-items:center;
+  gap:.35em;
+  margin-top:.55em;
+  padding:.3em .9em;
+  font-family:var(--cx-font);
+  font-size:.82rem;
+  line-height:1.1;
+  text-decoration:none;
+  color:#2f4a96;
+ 
+  border-radius:999px;
+  box-shadow:0 2px 0 #2f4a96;
+}
+
+@media (prefers-reduced-motion:reduce){
+  button.cx-info{animation:none}
+}

@@ -234,7 +234,7 @@ export default function RsvpForm({
         <h2>You’re all set! 🏁</h2>
         <p>We already have your RSVP, so there’s nothing more to do.</p>
         {wished
-          ? onOpenWall && <button type="button" className="btn wish-btn" onClick={onOpenWall}>See the wish wall🖼️</button>
+          ? onOpenWall && <button type="button" className="btn wish-btn" onClick={onOpenWall}>See all wishes🖼️</button>
           : onWrite && <button type="button" className="btn wish-btn" onClick={() => onWrite(name.trim())}>Write a birthday wish🌠</button>}
       </div>
     );
@@ -266,7 +266,7 @@ export default function RsvpForm({
           <>
             {onOpenWall && (
               <button type="button" className="btn wish-btn" onClick={onOpenWall}>
-                See the wish wall🖼️
+                See all wishes🖼️
               </button>
             )}
           </>
