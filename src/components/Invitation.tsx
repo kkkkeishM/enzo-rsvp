@@ -137,11 +137,11 @@ export default function Invitation({
                 <span className="venue-address">{EVENT.address}</span>
               </p>
               <div className="dir-links">
-                <a className="link" href={googleDirections(EVENT.address)} target="_blank" rel="noopener noreferrer">
-                  Google Maps
+                <a className="link gmaps" href={googleDirections(EVENT.address)} target="_blank" rel="noopener noreferrer">
+                  <span className="link-ico" aria-hidden="true">📍</span> Google Maps
                 </a>
                 <a className="link waze" href={wazeDirections(EVENT.address)} target="_blank" rel="noopener noreferrer">
-                  Waze
+                  <span className="link-ico" aria-hidden="true">🚗</span> Waze
                 </a>
               </div>
             </div>
@@ -209,11 +209,16 @@ export default function Invitation({
       </div>
 
       <nav className="slide-nav" aria-label="Invitation navigation">
-        <button className="nav-back" type="button" onClick={prev}>
+        <button
+          className="nav-back"
+          type="button"
+          onClick={prev}
+        >
           <Arrow dir="left" /> Back
         </button>
+
         <div className="dots">
-        {Array.from({ length: wallOpen ? LAST + 1 : LAST }, (_, n) => (
+          {Array.from({ length: wallOpen ? LAST + 1 : LAST }, (_, n) => (
             <button
               key={n}
               type="button"
@@ -224,18 +229,24 @@ export default function Invitation({
             />
           ))}
         </div>
-        {i < LAST && i !== 3 ? (
-          <button className="nav-next" type="button" onClick={next}>
-            Next <Arrow dir="right" />
-          </button>
-        ) : i === LAST && onChristening ? (
+
+        {i === LAST ? (
           <button
-            className="nav-next nav-home"
+            className="nav-home"
             type="button"
-            onClick={onChristening}
-            aria-label="Go to home"
+            onClick={() => { console.log("home clicked"); onChristening?.(); }}
+            aria-label="Go to christening invitation"
+            title="Go to christening invitation"
           >
             <House size={22} strokeWidth={2.5} />
+          </button>
+        ) : i !== 3 ? (
+          <button
+            className="nav-next"
+            type="button"
+            onClick={next}
+          >
+            Next <Arrow dir="right" />
           </button>
         ) : (
           <span />

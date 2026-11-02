@@ -13,8 +13,6 @@ type Screen = "godparent" | "christening" | "envelope" | "cover" | "invite";
 type WipePhase = "idle" | "in" | "out";
 type Variant = "check" | "soft" | "smoke" | "smokeback";
 
-
-
 export default function Home() {
   const [screen, setScreen] = useState<Screen>("godparent");
   const [wipe, setWipe] = useState<WipePhase>("idle");
@@ -24,25 +22,33 @@ export default function Home() {
   const [wished, setWished] = useState(false);
 
   function goTo(next: Screen, v: Variant = "check") {
+    console.log("goTo called", next, v, "current:", screen, "wipe:", wipe); // debug line
     if (wipe !== "idle") return; // ignore taps while a transition is running
     setVariant(v);
-    const isSmoke = v === "smoke" || v === "smokeback";
     const t =
-    v === "smoke" ? { swap: 1700, end: 3700 } :
-    v === "smokeback" ? { swap: 1500, end: 3500 } :
-    { swap: 650, end: 1300 };
-    setWipe("in");
-    setTimeout(() => {
-      setScreen(next);
-      setWipe("out");
-    }, t.swap);
-    setTimeout(() => setWipe("idle"), t.end);
+      v === "smoke" ? { swap: 1700, end: 3700 } :
+      v === "smokeback" ? { swap: 1500, end: 3500 } :
+      { swap: 650, end: 1300 };
+
+    // wait two frames so the wipe is painted off-screen before it slides in
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setWipe("in");
+        setTimeout(() => {
+          setScreen(next);
+          setWipe("out");
+        }, t.swap);
+        setTimeout(() => setWipe("idle"), t.end);
+      });
+    });
   }
+
+  const isSmoke = variant === "smoke" || variant === "smokeback";
 
   return (
     <>
-      {variant === "smoke" || variant === "smokeback" ? (
-      <SmokeWipe phase={wipe} withCar={variant !== "smokeback"} />
+      {isSmoke ? (
+        <SmokeWipe phase={wipe} withCar={variant !== "smokeback"} />
       ) : (
         <div className={variant === "soft" ? "wipe-soft" : undefined}>
           <Wipe phase={wipe} />
@@ -58,7 +64,10 @@ export default function Home() {
         />
       )}
       {screen === "christening" && (
-        <Christening godparent={godparent} onContinue={() => goTo(rsvped ? "invite" : "envelope", "smoke")} />
+        <Christening
+          godparent={godparent}
+          onContinue={() => goTo(rsvped ? "invite" : "envelope", "smoke")}
+        />
       )}
       {screen === "envelope" && (
         <>
@@ -80,8 +89,6 @@ export default function Home() {
           onChristening={() => goTo("christening", "smokeback")}
         />
       )}
-      {screen === "cover" && <Cover onEnter={() => goTo("invite")} onBack={() => goTo("envelope")} />}
-      {screen === "invite" && <Invitation onBack={() => goTo("cover")} godparent={godparent} />}
     </>
   );
 }

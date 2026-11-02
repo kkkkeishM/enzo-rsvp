@@ -305,7 +305,72 @@ a {
 }
 
 /* navigation */
-.slide-nav{position:absolute;left:0;right:0;bottom:0;z-index:10;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));background:linear-gradient(transparent,#eceef2 45%)}
+
+.slide-nav {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 12px;
+  z-index: 100;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 12px;
+  pointer-events: none;
+}
+
+.slide-nav > * {
+  pointer-events: auto;
+}
+
+/* Keep the dots centered relative to the screen */
+.slide-nav .dots {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  margin: 0;
+  padding: 0;
+  white-space: nowrap;
+}
+
+/* Keep navigation buttons above the dots */
+.slide-nav .nav-back,
+.slide-nav .nav-next,
+.slide-nav .nav-home {
+  position: relative;
+  z-index: 2;
+}
+
+/* Home button */
+.slide-nav .nav-home {
+  flex: 0 0 46px;
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 3px solid #111;
+  border-radius: 50%;
+  background: #fff;
+  color: #111;
+
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+}
+
 .nav-back,.nav-next{font:400 1.1rem/1 var(--display);display:flex;align-items:center;gap:.35em;border:3px solid var(--ink);border-radius:999px;padding:.45em 1em;cursor:pointer;box-shadow:0 4px 0 var(--ink);transition:transform .12s,box-shadow .12s}
 .nav-back{justify-self:start;background:#fff;color:var(--ink)}
 .nav-next{justify-self:end;background:var(--red);color:#fff;font-size:1.3rem;animation:nextnudge 1.4s ease-in-out infinite}
@@ -387,6 +452,18 @@ button:focus:not(:focus-visible){outline:none}
 .modal-actions{display:flex;gap:10px;justify-content:flex-end}
 .modal-actions .btn-sm:disabled{opacity:.6;cursor:wait}
 @media (prefers-reduced-motion:reduce){.modal{animation:none}}
+
+/* greeting line on the RSVP form */
+.rsvp-form .name-line{
+  margin:0;
+  font-size:1.35rem;
+  font-weight:800;
+  line-height:1.2;
+  color:var(--ink);
+}
+.rsvp-form .name-line b{
+  font-weight:900;
+}
 
 /* ===== Guest list page (/guests) =====
    Add at the bottom of globals.css. If you already have older .admin / .stat / .guest / .tag rules,
@@ -633,6 +710,38 @@ button:focus:not(:focus-visible){outline:none}
 .dir-links{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
 .link.waze{background:#33ccff;color:#15161c}
 
+/* Venue directions buttons */
+.dir-links{flex-wrap:nowrap;gap:10px;width:100%}
+.dir-links .link{
+  flex:1 1 0;
+  min-width:0;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:.4em;
+  white-space:nowrap;
+  font:400 1.05rem/1 var(--display);
+  letter-spacing:.01em;
+  padding:.65em .8em;
+  border:2px solid var(--ink);
+  border-radius:999px;
+  box-shadow:0 4px 0 var(--ink),0 8px 12px rgba(0, 0, 0, 0.18);
+  transition:transform .12s,box-shadow .12s;
+}
+.dir-links .link.gmaps{background:linear-gradient(#2f6fc0,#1d4f91);color:#fff}
+.dir-links .link.waze{background:linear-gradient(#6fe0ff,#33ccff);color:var(--ink)}
+.dir-links .link:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.dir-links .link:focus-visible{outline:4px solid var(--blue);outline-offset:3px}
+
+/* little hopping icons (reuses the cxhop animation from the christening page) */
+.link-ico{display:inline-block;animation:cxhop 1.6s ease-in-out infinite}
+.dir-links .link.waze .link-ico{animation-delay:-.8s}
+@media (prefers-reduced-motion:reduce){.link-ico{animation:none}}
+
+@media (max-width:380px){
+  .dir-links .link{font-size:.95rem;padding:.6em .5em}
+}
+
 /* ===== Christening page (first screen) ===== */
 @font-face{font-family:"Childos Arabic";src:url("/fonts/ChildosArabic.ttf") format("truetype");font-display:swap}
 .cx-screen{--cx-font:"Childos Arabic",var(--display),system-ui,sans-serif}
@@ -837,7 +946,6 @@ button:focus:not(:focus-visible){outline:none}
 .cx-addr{margin:.1em 0 0;font-size:.82rem;line-height:1.25;color:#5f6fa0}
 .cx-ei{font-size:1.05em}
 
-.nav-home{font-size:.95rem;animation:none}
 
 /* stop the page behind the invitation from scrolling */
 body.invite-lock{position:fixed;inset:0;width:100%;overflow:hidden;overscroll-behavior:none}

@@ -325,7 +325,7 @@ export default function RsvpForm({
 
       <div>
         <label htmlFor="rsvp-notes">
-          {going ? "Food allergies or notes (optional)" : "Reason for not attending"}
+          {going ? "Food allergies or notes (optional)" : "Reason for not attending:"}
         </label>
         <textarea
           id="rsvp-notes"

@@ -86,8 +86,7 @@ export default function WishDialog({
           </>
         )}
 
-        <label htmlFor="wish-message">Your wish</label>
-        <textarea id="wish-message" ref={msgRef} rows={4} maxLength={MAX_MESSAGE} placeholder="Happy 1st birthday, Enzo!" value={message} onChange={(e) => setMessage(e.target.value)} />
+        <textarea id="wish-message" ref={msgRef} rows={4} maxLength={MAX_MESSAGE} placeholder="Your sweet message for Enzo goes here..." value={message} onChange={(e) => setMessage(e.target.value)} />
         <small className="wish-count">{message.length}/{MAX_MESSAGE}</small>
 
         <p className="err" role="alert">{error}</p>
