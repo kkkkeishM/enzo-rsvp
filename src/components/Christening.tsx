@@ -164,10 +164,8 @@ const MOBILE: { x: number; len: number; d: number; dl: number; kind: "star" | "m
       <button type="button" className="cx-info" onClick={() => setDirOpen(true)} aria-haspopup="dialog">
         <span className="cx-row"><span className="cx-ei" aria-hidden="true">📅</span> {DETAILS.date}</span>
         <span className="cx-row"><span className="cx-ei" aria-hidden="true">🕗</span> {DETAILS.time}</span>
-        <span className="cx-row cx-venue"><span className="cx-ei" aria-hidden="true">⛪</span> {DETAILS.venue}</span>
-        <span className="cx-addr">{DETAILS.address}</span>
         <span className="cx-tap">
-          <span className="cx-ico" aria-hidden="true">📍</span> Tap for directions <span aria-hidden="true">›</span>
+          <span className="cx-ico" aria-hidden="true">📍</span> Tap for venue directions <span aria-hidden="true">›</span>
         </span>
       </button>
         <button type="button" className="cx-go" onClick={onContinue}>
