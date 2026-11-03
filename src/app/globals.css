@@ -50,6 +50,10 @@ a {
   }
 }
 
+body.invite-lock {
+  overscroll-behavior: none;
+}
+
 .wipe {
   position: fixed;
   inset: 0;
@@ -270,6 +274,10 @@ a {
 
 /* slides — stacked (not a horizontal strip) so fingers can't swipe between pages */
 .invite-screen{position:fixed;inset:0;width:100%;overflow:hidden;background:#eceef2;overscroll-behavior:none}
+.invite-screen {
+  touch-action: pan-y;
+  overscroll-behavior-x: none;
+}
 .slides{position:absolute;inset:0}
 /* slide backgrounds — keep position:absolute from stacked .slide rule above */
 .slide{position:relative;background-size:cover;background-position:center;background-repeat:no-repeat}
@@ -350,25 +358,96 @@ a {
   z-index: 2;
 }
 
-/* Home button */
+/* Home button: larger, matching Back button proportions */
 .slide-nav .nav-home {
-  flex: 0 0 46px;
-  width: 46px;
-  height: 46px;
-  min-width: 46px;
-  padding: 0;
+  position: relative;
 
-  display: flex;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+
+  display: inline-flex;
   align-items: center;
   justify-content: center;
 
-  border: 3px solid #111;
-  border-radius: 50%;
-  background: #fff;
-  color: #111;
+  box-sizing: border-box;
+  padding: 7px;
 
-  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.2);
-  cursor: pointer;
+  background: #173B73;
+  color: #ffffff;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+
+  box-shadow:
+    0 4px 0 #0D2852,
+    0 6px 12px rgba(0, 0, 0, 0.16);
+
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    filter 0.15s ease;
+
+  animation: homepulse 2.6s ease-in-out infinite;
+  will-change: transform;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Larger white house icon */
+.slide-nav .nav-home svg {
+  width: 21px;
+  height: 21px;
+  color: #ffffff;
+  stroke: #ffffff;
+  fill: none;
+  flex-shrink: 0;
+}
+
+/* Hover */
+.slide-nav .nav-home:hover {
+  background: #24518D;
+  filter: brightness(1.05);
+
+  box-shadow:
+    0 5px 0 #0D2852,
+    0 8px 16px rgba(0, 0, 0, 0.18);
+}
+
+/* Pressed effect */
+.slide-nav .nav-home:active {
+  animation: none;
+  transform: translateY(3px) scale(0.97);
+
+  box-shadow:
+    0 1px 0 #0D2852,
+    0 3px 6px rgba(0, 0, 0, 0.12);
+
+  transition-duration: 0.06s;
+}
+
+/* Keyboard accessibility */
+.slide-nav .nav-home:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 4px;
+}
+
+/* Gentle pulse */
+@keyframes homepulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.045);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .slide-nav .nav-home {
+    animation: none;
+    transition: none;
+    will-change: auto;
+  }
 }
 
 .nav-back,.nav-next{font:400 1.1rem/1 var(--display);display:flex;align-items:center;gap:.35em;border:3px solid var(--ink);border-radius:999px;padding:.45em 1em;cursor:pointer;box-shadow:0 4px 0 var(--ink);transition:transform .12s,box-shadow .12s}
@@ -452,6 +531,29 @@ button:focus:not(:focus-visible){outline:none}
 .modal-actions{display:flex;gap:10px;justify-content:flex-end}
 .modal-actions .btn-sm:disabled{opacity:.6;cursor:wait}
 @media (prefers-reduced-motion:reduce){.modal{animation:none}}
+
+.modal {
+  position: relative;
+  overflow: visible; /* not hidden */
+}
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px; /* inside the card, not -10px */
+  z-index: 10;
+}
+
+.modal-close {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: #fff;
+  color: #2b3a8c;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
 
 /* greeting line on the RSVP form */
 .rsvp-form .name-line{

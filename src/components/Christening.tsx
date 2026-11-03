@@ -192,8 +192,15 @@ const MOBILE: { x: number; len: number; d: number; dl: number; kind: "star" | "m
                   <span className="cx-ico" aria-hidden="true">🚗</span> {c.wazeLabel}
                 </a>
               </div>
-              <div className="modal-actions">
-                <button type="button" className="btn-sm alt" autoFocus onClick={() => setDirOpen(false)}>Close</button>
+              <div className="modal-card">   {/* the white card */}
+                <button
+                  type="button"
+                  className="modal-close"
+                  aria-label="Close"
+                  onClick={() => setDirOpen(false)}
+                >
+                  ×
+                </button>
               </div>
             </div>
           </div>,

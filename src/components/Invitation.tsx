@@ -29,7 +29,6 @@ export default function Invitation({
   onChristening?: () => void;
 }) {
   const [i, setI] = useState(alreadyRsvped ? 4 : 0);
-  const touchX = useRef<number | null>(null);
   const [giftOpen, setGiftOpen] = useState(false);
   const [wallIntroDone, setWallIntroDone] = useState(false);
   const finishIntro = useCallback(() => setWallIntroDone(true), []);
@@ -89,19 +88,11 @@ export default function Invitation({
   }, [alreadyWished]);
 
   return (
-    <main
-      ref={screenRef}
-      className="invite-screen"
-      onScroll={(e) => { e.currentTarget.scrollTop = 0; e.currentTarget.scrollLeft = 0; }}
-      onTouchStart={(e) => { touchX.current = e.touches[0].clientX; }}
-      onTouchEnd={(e) => {
-        if (touchX.current === null) return;
-        const dx = e.changedTouches[0].clientX - touchX.current;
-        touchX.current = null;
-        if (dx < -60) next();
-        if (dx > 60 && i > 0) prev();
-      }}
-    >
+      <main
+        ref={screenRef}
+        className="invite-screen"
+        onScroll={(e) => { e.currentTarget.scrollTop = 0; e.currentTarget.scrollLeft = 0; }}
+      >
       <div className="slides">
         {/* Slide 1: welcome + schedule */}
         <section {...sp(0)}>
