@@ -18,7 +18,7 @@ const Arrow = ({ dir }: { dir: "left" | "right" }) => (
 );
 
 export default function Invitation({
-  onBack, godparent, alreadyRsvped, alreadyWished, onRsvped, onWished, onChristening,
+  onBack, godparent, alreadyRsvped, alreadyWished, onRsvped, onWished, onChristening, startAtDetails,
 }: {
   onBack: () => void;
   godparent?: Godparent | null;
@@ -27,8 +27,9 @@ export default function Invitation({
   onRsvped?: () => void;
   onWished?: () => void;
   onChristening?: () => void;
+  startAtDetails?: boolean; 
 }) {
-  const [i, setI] = useState(alreadyRsvped ? 4 : 0);
+  const [i, setI] = useState(alreadyRsvped && !startAtDetails ? 4 : 0);
   const [giftOpen, setGiftOpen] = useState(false);
   const [wallIntroDone, setWallIntroDone] = useState(false);
   const finishIntro = useCallback(() => setWallIntroDone(true), []);
@@ -37,7 +38,7 @@ export default function Invitation({
   const [wished, setWished] = useState(!!alreadyWished);
   const [wallNote, setWallNote] = useState("");
   const [wallOpen, setWallOpen] = useState(!!alreadyRsvped);
-  
+  const [fromChristening, setFromChristening] = useState(false);
   
   
   

@@ -249,9 +249,11 @@ export default function RsvpForm({
         <h2>{going ? "Buckle Up, We're celebrating!" : `No worries, ${who}! ❤️`}</h2>
 
         {going ? (
-          <p>
-            {`Thanks, ${who}. We saved ${finalParty} ${finalParty === 1 ? "spot" : "spots"} for your crew. See you at the track!`}
-          </p>
+           <p>
+           {`Thanks, ${who}. We saved ${finalParty} ${finalParty === 1 ? "spot" : "spots"} for your crew.`}
+           <br />
+           Can't wait to celebrate with you. See you at the track!👋🏻
+         </p>
         ) : (
           <>
             <p>

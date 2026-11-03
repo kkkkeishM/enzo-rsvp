@@ -78,7 +78,7 @@ export default function WishDialog({
         <h3 id="wish-title">Birthday wish for Enzo 🎈</h3>
 
         {locked ? (
-          <p className="name-line">From <b>{locked}</b></p>
+          <p className="name-line">From <b>{locked}</b>, </p>
         ) : (
           <>
             <label htmlFor="wish-author">Your name</label>

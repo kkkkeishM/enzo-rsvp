@@ -534,7 +534,12 @@ button:focus:not(:focus-visible){outline:none}
 
 .modal {
   position: relative;
-  overflow: visible; /* not hidden */
+  overflow-y: auto;                 /* scrolls when the content is taller than the card */
+  overflow-x: hidden;
+  max-height: 85vh;                 /* fallback for older browsers */
+  max-height: 85dvh;                /* dvh follows the phone's toolbars */
+  overscroll-behavior: contain;     /* scrolling the modal won't move the page behind it */
+  -webkit-overflow-scrolling: touch;
 }
 .modal-close {
   position: absolute;
@@ -553,6 +558,14 @@ button:focus:not(:focus-visible){outline:none}
   font-size: 24px;
   line-height: 1;
   cursor: pointer;
+}
+
+.gift-modal .modal-actions {
+  position: sticky;
+  bottom: -20px;            /* matches the modal's 20px padding */
+  padding: 12px 0 4px;
+  margin-top: 4px;
+  background: #fff;
 }
 
 /* greeting line on the RSVP form */
@@ -1131,4 +1144,66 @@ button.cx-info .cx-tap{
 
 @media (prefers-reduced-motion:reduce){
   button.cx-info{animation:none}
+}
+
+/* ===== Christening: soft entrance (fade + gentle drift) ===== */
+.cx-screen{--cx-base:.45s}   /* starts after the page wipe clears; raise it for a later start */
+
+@keyframes cxsoft{
+  from{opacity:0;translate:0 14px}
+  to{opacity:1;translate:0 0}
+}
+@keyframes cxsoftdown{
+  from{opacity:0;translate:0 -14px}
+  to{opacity:1;translate:0 0}
+}
+@keyframes cxsettle{
+  from{opacity:0;scale:1.03;filter:blur(6px)}
+  to{opacity:1;scale:1;filter:blur(0)}
+}
+@keyframes cxfade{
+  from{opacity:0}
+  to{opacity:1}
+}
+
+/* 1. sky: clouds, sun, moons and hanging mobile fade in first */
+.cx-fx{animation:cxfade 1.8s ease calc(var(--cx-base) + .1s) backwards}
+
+/* 2. the main picture settles in softly */
+.cx-card{animation:cxsettle 1.4s ease var(--cx-base) backwards}
+
+/* 3. baby photos (and the stars and footprints on them) drift down, one after the other */
+.cx-ph-round{animation:cxsoftdown 1.2s ease calc(var(--cx-base) + .5s) backwards}
+.cx-ph-pol{animation:cxsoftdown 1.2s ease calc(var(--cx-base) + .8s) backwards}
+
+/* 4. the letter appears one paragraph at a time */
+.cx-letter p{animation:cxsoft 1s ease backwards}
+.cx-letter p:nth-child(1){animation-delay:calc(var(--cx-base) + 1.0s)}
+.cx-letter p:nth-child(2){animation-delay:calc(var(--cx-base) + 1.3s)}
+.cx-letter p:nth-child(3){animation-delay:calc(var(--cx-base) + 1.6s)}
+.cx-letter p:nth-child(4){animation-delay:calc(var(--cx-base) + 1.9s)}
+.cx-letter p:nth-child(5){animation-delay:calc(var(--cx-base) + 2.2s)}
+.cx-letter p:nth-child(n+6){animation-delay:calc(var(--cx-base) + 2.5s)}
+
+/* 5. buttons come in last; their existing wiggle/pulse still runs afterwards */
+button.cx-info{
+  animation:cxsoft 1s ease calc(var(--cx-base) + 2.0s) backwards, cxbtn 2.6s ease-in-out infinite;
+}
+.cx-go{
+  animation:cxsoft 1s ease calc(var(--cx-base) + 2.3s) backwards, cxpulse 2.4s ease-in-out infinite;
+}
+.cx-after{animation:cxfade 1.2s ease calc(var(--cx-base) + 2.6s) backwards}
+
+/* respect "reduce motion" */
+@media (prefers-reduced-motion:reduce){
+  .cx-fx,.cx-card,.cx-ph-round,.cx-ph-pol,.cx-letter p,.cx-after{animation:none}
+  button.cx-info,.cx-go{animation:none}
+}
+
+/* keep the entrance animation from replaying after a tap */
+button.cx-info:active{
+  animation:cxsoft 1s ease calc(var(--cx-base) + 2s) backwards, none;
+}
+.cx-go:active{
+  animation:cxsoft 1s ease calc(var(--cx-base) + 2.3s) backwards, none;
 }

@@ -20,9 +20,10 @@ export default function Home() {
   const [godparent, setGodparent] = useState<Godparent | null>(null);
   const [rsvped, setRsvped] = useState(false);
   const [wished, setWished] = useState(false);
+  const [seenEnvelope, setSeenEnvelope] = useState(false);     // has the guest opened the envelope yet?
+  const [skippedEnvelope, setSkippedEnvelope] = useState(false); // did this trip to the cover skip it?
 
   function goTo(next: Screen, v: Variant = "check") {
-    console.log("goTo called", next, v, "current:", screen, "wipe:", wipe); // debug line
     if (wipe !== "idle") return; // ignore taps while a transition is running
     setVariant(v);
     const t =
@@ -63,23 +64,48 @@ export default function Home() {
           }}
         />
       )}
+
       {screen === "christening" && (
         <Christening
           godparent={godparent}
-          onContinue={() => goTo(rsvped ? "invite" : "envelope", "smoke")}
+          onContinue={() => {
+            if (seenEnvelope) {
+              setSkippedEnvelope(true);   // returning guest: skip the envelope
+              goTo("cover", "smoke");
+            } else {
+              setSkippedEnvelope(false);  // first visit: show the envelope
+              goTo("envelope", "smoke");
+            }
+          }}
         />
       )}
+
       {screen === "envelope" && (
         <>
-          <Envelope onOpened={() => goTo("cover")} />
+          <Envelope
+            onOpened={() => {
+              setSeenEnvelope(true);
+              goTo("cover");
+            }}
+          />
           <BackButton onClick={() => goTo("christening", "smokeback")} label="Back" />
         </>
       )}
+
       {screen === "cover" && (
-        <Cover onEnter={() => goTo("invite")} onBack={() => goTo("envelope")} />
+        <Cover
+          onEnter={() => goTo("invite")}
+          onBack={() =>
+            skippedEnvelope
+              ? goTo("christening", "smokeback")
+              : goTo("envelope")
+          }
+        />
       )}
+
       {screen === "invite" && (
         <Invitation
+          startAtDetails={skippedEnvelope}
           onBack={() => goTo("cover")}
           godparent={godparent}
           alreadyRsvped={rsvped}
