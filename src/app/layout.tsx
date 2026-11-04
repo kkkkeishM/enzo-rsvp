@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   description: "A year of love and little adventures, and a special day to celebrate Enzo's first birthday and christening. Tap to see the details and RSVP.",
   openGraph: {
     title: "Route 001 | Enzo's Road to ONE",
-    description: "A year of love and little adventures, and a special day to celebrate Enzo's first birthday and christening. Tap to see the details and RSVP.",
+    description: "A year of love and little adventures, and a special day to celebrate Enzo's first birthday and christening. Tap to see the details",
     url: "/",
     siteName: "Route 001 | Enzo's Road to ONE",
     type: "website",
