@@ -54,7 +54,7 @@ export const greetingFor = (g?: { title: GodparentTitle | null; name: string } |
 
     export const DETAILS = {
       date: "Saturday, November 21, 2026",
-      time: "8:00 – 11:00 AM",
+      time: "9:30 - 11:30 AM",
       venue: "Immaculate Conception Cathedral",
       address: "Plaza Rizal, Justice Ramon Jabson, Pasig City",
     };

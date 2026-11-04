@@ -479,7 +479,7 @@ body.invite-lock {
 
 /* spacing between the sentences on the confirmation card */
 .done h2{margin-bottom:18px}
-.done p{margin:0 0 16px;line-height:1.55}
+.done p{margin:0 0 10px;line-height:1.55}
 .done p:last-of-type{margin-bottom:6px}
 
 /* slide backgrounds — keep position:absolute from stacked .slide rule above */
@@ -1207,3 +1207,129 @@ button.cx-info:active{
 .cx-go:active{
   animation:cxsoft 1s ease calc(var(--cx-base) + 2.3s) backwards, none;
 }
+
+
+/* ===== Confirm RSVP dialog ===== */
+.confirm-modal{max-width:440px;padding-top:0}
+
+.modal-strip{
+  height:14px;margin:0 -20px 16px;
+  background:repeating-conic-gradient(#15161c 0 25%,#fff 0 50%) 0 0/28px 28px;
+  border-bottom:3px solid var(--ink);
+}
+
+.modal-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.modal-badge{
+  flex:none;display:grid;place-items:center;
+  width:3rem;height:3rem;font-size:1.5rem;
+  background:var(--yellow);border:3px solid var(--ink);border-radius:50%;
+  box-shadow:0 3px 0 var(--ink);transform:rotate(-6deg);
+}
+.confirm-modal h3{margin:0;font:400 1.5rem/1.1 var(--display)}
+.modal-sub{margin:2px 0 0;font-weight:700;font-size:.85rem;color:#5a5f6b}
+
+/* scoreboard rows, same look as the schedule board */
+.cf-list{
+  margin:0 0 12px;padding:4px 16px;
+  background:var(--ink);border:3px solid var(--yellow);border-radius:16px;
+}
+.cf-list div{
+  display:grid;grid-template-columns:96px 1fr;gap:10px;align-items:baseline;
+  padding:10px 0;border-bottom:2px dashed #3a3d49;
+}
+.cf-list div:last-child{border-bottom:0}
+.cf-list dt{font:800 .75rem var(--body);text-transform:uppercase;letter-spacing:.06em;color:var(--yellow)}
+.cf-list dd{margin:0;font-weight:700;color:#fff;word-break:break-word}
+
+/*  total chip */
+.cf-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding: 5px 6px 5px 12px;
+  background: #e4f6e9;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  box-shadow: 0 2px 0 var(--ink);
+  font-weight: 800;
+}
+
+.cf-total b {
+  display: grid;
+  place-items: center;
+  min-width: 1.9rem;
+  height: 1.9rem;
+  padding: 0 0.4em;
+  font: 400 1.1rem/1 var(--display);
+  color: #fff;
+  background: var(--red);
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+}
+
+/* caution callout */
+.modal-warn{
+  display:flex;gap:10px;align-items:flex-start;
+  margin:0 0 16px;padding:10px 12px;
+  background:#fff7d6;border:2px dashed #b88a00;border-radius:12px;
+  font-weight:700;font-size:.85rem;line-height:1.4;color:var(--ink);
+}
+
+/* full-width buttons */
+.confirm-modal .modal-actions{gap:10px}
+.confirm-modal .btn-sm{flex:1;padding:.6em .8em;font-size:.95rem;transition:transform .12s,box-shadow .12s}
+.confirm-modal .btn-sm:active:not(:disabled){transform:translateY(3px);box-shadow:0 0 0 var(--ink)}
+.confirm-modal .btn-sm:focus-visible{outline:4px solid var(--blue);outline-offset:3px}
+
+@media (max-width:380px){
+  .cf-list div{grid-template-columns:1fr;gap:2px}
+  .confirm-modal .modal-actions{flex-direction:column-reverse}
+}
+@media (prefers-reduced-motion:reduce){.confirm-modal .btn-sm{transition:none}}
+
+
+/* ===== Directions buttons ===== */
+.dir-links{
+  display:flex;flex-wrap:nowrap;justify-content:center;
+  gap:10px;
+  padding:4px 10px 8px;
+}
+.dir-btn{
+  flex:1 1 0;min-width:0;
+  display:flex;align-items:center;gap:6px;
+  padding:.4em .6em .4em .4em;
+  color:var(--ink);text-align:left;
+  border:3px solid var(--ink);border-radius:999px;
+  box-shadow:0 4px 0 var(--ink);
+  transition:transform .12s,box-shadow .12s;
+}
+.dir-btn.gmaps{background:#fff}
+.dir-btn.waze{background:#33ccff}
+
+.dir-ico{
+  flex:none;display:grid;place-items:center;
+  width:1.8rem;height:1.8rem;border-radius:50%;
+  border:2px solid var(--ink);
+}
+.gmaps .dir-ico{background:#e63b2e}
+.waze .dir-ico{background:var(--yellow)}
+.dir-ico svg{width:1.25rem;height:1.25rem;fill:#fff;stroke:#fff;stroke-width:1;stroke-linejoin:round}
+.waze .dir-ico svg{fill:var(--ink);stroke:var(--ink)}
+
+.dir-txt{display:grid;line-height:1.1;min-width:0}
+.dir-txt small{font:600 .7rem var(--body);opacity:.7;text-transform:uppercase;letter-spacing:.06em}
+.dir-txt b{font:400 1.05rem/1.1 var(--display);white-space:nowrap}
+
+.dir-btn:hover{transform:translateY(-2px) rotate(-1deg);box-shadow:0 6px 0 var(--ink)}
+.dir-btn.waze:hover{transform:translateY(-2px) rotate(1deg)}
+.dir-btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.dir-btn:focus-visible{outline:4px solid var(--blue);outline-offset:3px}
+
+@media (max-width:360px){
+  .dir-btn{padding:.4em .55em .4em .4em}
+  .dir-ico{width:1.7rem;height:1.7rem}
+  .dir-txt small{display:none}
+  .dir-txt b{font-size:.85rem}
+}
+@media (prefers-reduced-motion:reduce){.dir-btn{transition:none}}

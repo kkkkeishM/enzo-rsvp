@@ -232,7 +232,14 @@ export default function RsvpForm({
     return (
       <div className="done" role="status">
         <h2>You’re all set! 🏁</h2>
-        <p>We already have your RSVP, so there’s nothing more to do.</p>
+        <>
+        <p>
+          We've received your response.
+        </p>
+        <p>
+          No further action is needed
+        </p>
+        </>
         {wished
           ? onOpenWall && <button type="button" className="btn wish-btn" onClick={onOpenWall}>See all wishes🖼️</button>
           : onWrite && <button type="button" className="btn wish-btn" onClick={() => onWrite(name.trim())}>Write a birthday wish🌠</button>}
@@ -354,27 +361,52 @@ export default function RsvpForm({
               e.stopPropagation(); // keep arrow keys from changing slides behind the dialog
             }}
           >
-            <div className="modal" role="dialog" aria-modal="true" aria-labelledby="cf-title" onClick={(e) => e.stopPropagation()}>
-              <h3 id="cf-title">Confirm your RSVP</h3>
-              <ul className="modal-list">
-                <li><b>Name:</b> {who || name.trim()}</li>
+            <div className="modal confirm-modal" role="dialog" aria-modal="true" aria-labelledby="cf-title" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-strip" aria-hidden="true" />
+
+              <div className="modal-head">
+                <span className="modal-badge" aria-hidden="true">{going ? "🏁" : "👋"}</span>
+                <div>
+                  <h3 id="cf-title">Confirm your RSVP</h3>
+                  <p className="modal-sub">{going ? "Ready to hit the track?" : "One last check before you send"}</p>
+                </div>
+              </div>
+
+              <dl className="cf-list">
+                <div><dt>Name</dt><dd>{name.trim()}</dd></div>
                 {going ? (
                   <>
-                    <li><b>Adult guest{adultCount > 1 ? "s" : ""}:</b> {adultCount ? adults.map((n) => n.trim()).join(", ") : "None"}</li>
-                    <li><b>Kids:</b> {kidCount ? kids.map((n) => n.trim()).join(", ") : "None"}</li>
-                    <li><b>Total attending:</b> {party}</li>
+                    <div><dt>Adult guest{adultCount > 1 ? "s" : ""}</dt><dd>{adultCount ? adults.map((n) => n.trim()).join(", ") : "None"}</dd></div>
+                    <div><dt>Kids</dt><dd>{kidCount ? kids.map((n) => n.trim()).join(", ") : "None"}</dd></div>
                   </>
                 ) : (
-                  <li>You’re letting us know you can’t make it.</li>
+                  <>
+                    <div><dt>Status</dt><dd>Can’t make it</dd></div>
+                    {notes.trim() && <div><dt>Reason</dt><dd>{notes.trim()}</dd></div>}
+                  </>
                 )}
-              </ul>
+              </dl>
+
+              {going && (
+                <div className="cf-total">
+                  <span>Total attending</span>
+                  <b>{party}</b>
+                </div>
+              )}
+
               <p className="modal-warn">
-                {going
-                  ? "Please double-check every name. Guest slots are limited, and your group will be counted right away."
-                  : "Are you sure? You can send a new reply later using the same link."}
+                <span aria-hidden="true">⚠️</span>
+                <span>
+                  {going
+                    ? "Please double-check every name. Guest slots are limited, and your group will be counted right away."
+                    : "Are you sure? You can send a new reply later using the same link."}
+                </span>
               </p>
+
               <div className="modal-actions">
-                <button type="button" className="btn-sm alt" disabled={status === "sending"} onClick={() => setConfirming(false)}>Go back</button>
+                <button type="button" className="btn-sm alt" disabled={status === "sending"} onClick={() => setConfirming(false)}>
+                  Go back
+                </button>
                 <button type="button" className="btn-sm" ref={confirmRef} disabled={status === "sending"} onClick={send}>
                   {status === "sending" ? "Sending..." : going ? "Yes, rev me in!" : "Yes, send it"}
                 </button>

@@ -17,6 +17,18 @@ const Arrow = ({ dir }: { dir: "left" | "right" }) => (
   </svg>
 );
 
+const PinIcon = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z" />
+  </svg>
+);
+
+const NavIcon = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M12 2 4.5 21l7.5-4 7.5 4z" />
+  </svg>
+);
+
 export default function Invitation({
   onBack, godparent, alreadyRsvped, alreadyWished, onRsvped, onWished, onChristening, startAtDetails,
 }: {
@@ -129,11 +141,27 @@ export default function Invitation({
                 <span className="venue-address">{EVENT.address}</span>
               </p>
               <div className="dir-links">
-                <a className="link gmaps" href={googleDirections(EVENT.address)} target="_blank" rel="noopener noreferrer">
-                  <span className="link-ico" aria-hidden="true">📍</span> Google Maps
+                <a
+                  className="dir-btn gmaps"
+                  href={googleDirections(EVENT.address)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <span className="dir-ico"><PinIcon /></span>
+                  <span className="dir-txt">
+                    <b>Google Maps</b>
+                  </span>
                 </a>
-                <a className="link waze" href={wazeDirections(EVENT.address)} target="_blank" rel="noopener noreferrer">
-                  <span className="link-ico" aria-hidden="true">🚗</span> Waze
+                <a
+                  className="dir-btn waze"
+                  href={wazeDirections(EVENT.address)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <span className="dir-ico"><NavIcon /></span>
+                  <span className="dir-txt">
+                    <b>Waze</b>
+                  </span>
                 </a>
               </div>
             </div>

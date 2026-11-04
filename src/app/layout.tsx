@@ -17,10 +17,26 @@ const body = Nunito({
   variable: "--font-body",
 });
 
+
 export const metadata: Metadata = {
-  title: "Enzo’s 1st Birthday Race Day",
-  description: "You’re invited!",
-  robots: { index: false, follow: false }, // keeps it out of search results
+  metadataBase: new URL("https://enzo-rsvp.vercel.app/"), // your real live URL
+  title: "Route 001 | Enzo's Road to ONE",
+  description: "A year of love and little adventures, and a special day to celebrate Enzo's first birthday and christening. Tap to see the details and RSVP.",
+  openGraph: {
+    title: "Route 001 | Enzo's Road to ONE",
+    description: "A year of love and little adventures, and a special day to celebrate Enzo's first birthday and christening. Tap to see the details and RSVP.",
+    url: "/",
+    siteName: "Route 001 | Enzo's Road to ONE",
+    type: "website",
+    images: [
+      {
+        url: "public/poster.png",
+        width: 1200,
+        height: 630,
+        alt: "Enzo First Birthday and Christening to Remember!",
+      },
+    ],
+  },
 };
 
 export default function RootLayout({
