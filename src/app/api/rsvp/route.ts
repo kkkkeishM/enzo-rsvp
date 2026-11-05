@@ -7,6 +7,13 @@ function names(v: unknown): string[] {
   return v.map((x) => (typeof x === "string" ? x.trim().replace(/\s+/g, " ").slice(0, MAX_NAME_LENGTH) : ""));
 }
 
+const sponsorFrom = (t?: string | null): "ninang" | "ninong" | null => {
+  const s = (t ?? "").toLowerCase();
+  if (s.includes("ninang")) return "ninang";
+  if (s.includes("ninong")) return "ninong";
+  return null;
+};
+
 const bad = (error: string, status = 400) => NextResponse.json({ error }, { status });
 
 export async function POST(req: Request) {
@@ -21,6 +28,7 @@ export async function POST(req: Request) {
   const attending = body.attending === "yes" ? "yes" : body.attending === "no" ? "no" : null;
   const notes = typeof body.notes === "string" ? body.notes.trim().slice(0, 300) : "";
   const code = typeof body.code === "string" && body.code.trim() ? body.code.trim().slice(0, 64) : null;
+  const sponsor = sponsorFrom(typeof body.title === "string" ? body.title : null);
 
   if (!name || !attending) return bad("Name and answer required");
   if (!code && process.env.REQUIRE_INVITE_CODE === "true") {
@@ -57,6 +65,16 @@ export async function POST(req: Request) {
       const status = data?.code === "full" ? 409 : data?.code === "invalid_invite" ? 404 : data?.code === "over_allowance" ? 422 : 400;
       return NextResponse.json({ error: data?.message ?? "Could not save", code: data?.code, remaining: data?.remaining }, { status });
     }
+
+    // tag the reply as Ninang/Ninong (the RPC doesn't know about this column)
+    if (sponsor) {
+      const { error: tagError } = await getSupabase()
+        .from("rsvps")
+        .update({ sponsor })
+        .eq("name", name);
+      if (tagError) console.error("Sponsor tag failed:", tagError);
+    }
+
     return NextResponse.json({ ok: true, party: data.party });
   } catch (e) {
     console.error("RSVP save failed:", e);

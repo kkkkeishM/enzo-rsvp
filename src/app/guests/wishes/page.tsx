@@ -33,6 +33,18 @@ export default function WishesAdminPage() {
     load();
   }
 
+  async function removeAll() {
+    if (!wishes || wishes.length === 0) return;
+    const typed = prompt(`This permanently deletes all ${wishes.length} wishes from the wall.\n\nType DELETE to confirm.`);
+    if (typed !== "DELETE") return;
+    setLoading(true);
+    setError("");
+    const results = await Promise.all(wishes.map((w) => call("DELETE", { id: w.id }).catch(() => null)));
+    const failed = results.filter((r) => !r || !r.ok).length;
+    await load(); // load() clears the error, so set the message after it finishes
+    if (failed) setError(`${failed} wish${failed === 1 ? "" : "es"} couldn’t be deleted. Try again.`);
+  }
+
   const shown = wishes?.filter((w) => w.approved).length ?? 0;
 
   return (
@@ -49,7 +61,15 @@ export default function WishesAdminPage() {
         ) : (
           <>
             <p style={{ fontWeight: 800 }}>{wishes.length} wishes · {shown} showing on the wall · {wishes.length - shown} hidden</p>
-            <div className="toolbar"><div className="tools" style={{ marginLeft: 0 }}><button className="btn-sm alt" type="button" onClick={load}>Refresh</button></div></div>
+            {error && <p className="err" role="alert">{error}</p>}
+            <div className="toolbar">
+              <div className="tools" style={{ marginLeft: 0 }}>
+                <button className="btn-sm alt" type="button" onClick={load}>Refresh</button>
+                <button className="btn-sm danger" type="button" onClick={removeAll} disabled={loading || wishes.length === 0}>
+                  Delete all
+                </button>
+              </div>
+            </div>
             <div className="table-wrap">
               <table className="gtable" style={{ minWidth: 0 }}>
                 <thead><tr><th>#</th><th>From</th><th>Wish</th><th>On the wall?</th><th>Sent</th><th><span className="sr">Actions</span></th></tr></thead>

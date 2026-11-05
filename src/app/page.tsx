@@ -8,6 +8,10 @@ import Envelope from "@/components/Envelope";
 import Cover from "@/components/Cover";
 import Invitation from "@/components/Invitation";
 import BackButton from "@/components/BackButton";
+import MusicButton from "@/components/MusicButton";
+import { startChristeningMusic, startMusic } from "@/lib/music";
+
+
 
 type Screen = "godparent" | "christening" | "envelope" | "cover" | "invite";
 type WipePhase = "idle" | "in" | "out";
@@ -46,6 +50,8 @@ export default function Home() {
 
   const isSmoke = variant === "smoke" || variant === "smokeback";
 
+  
+
   return (
     <>
       {isSmoke ? (
@@ -56,9 +62,12 @@ export default function Home() {
         </div>
       )}
 
+      <MusicButton />
+
       {screen === "godparent" && (
         <GodparentName
           onDone={(g) => {
+            startChristeningMusic();   // inside the tap, so phones allow audio
             setGodparent(g);
             goTo("christening", "soft");
           }}
@@ -70,6 +79,7 @@ export default function Home() {
           godparent={godparent}
           onContinue={() => {
             if (seenEnvelope) {
+              startMusic(); 
               setSkippedEnvelope(true);   // returning guest: skip the envelope
               goTo("cover", "smoke");
             } else {
@@ -88,18 +98,27 @@ export default function Home() {
               goTo("cover");
             }}
           />
-          <BackButton onClick={() => goTo("christening", "smokeback")} label="Back" />
+          <BackButton
+              onClick={() => {
+                startChristeningMusic();
+                goTo("christening", "smokeback");
+              }}
+              label="Back"
+            />
         </>
       )}
 
       {screen === "cover" && (
         <Cover
           onEnter={() => goTo("invite")}
-          onBack={() =>
-            skippedEnvelope
-              ? goTo("christening", "smokeback")
-              : goTo("envelope")
-          }
+          onBack={() => {
+            if (skippedEnvelope) {
+              startChristeningMusic();
+              goTo("christening", "smokeback");
+            } else {
+              goTo("envelope");   // birthday song keeps playing, as before
+            }
+          }}
         />
       )}
 
@@ -112,7 +131,10 @@ export default function Home() {
           alreadyWished={wished}
           onRsvped={() => setRsvped(true)}
           onWished={() => setWished(true)}
-          onChristening={() => goTo("christening", "smokeback")}
+          onChristening={() => {
+            startChristeningMusic();   // stops and rewinds the birthday song, restarts the christening song
+            goTo("christening", "smokeback");
+          }}
         />
       )}
     </>

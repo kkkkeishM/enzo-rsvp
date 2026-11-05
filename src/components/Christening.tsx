@@ -1,5 +1,6 @@
 "use client";
-import { useState, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
+import { ensureTrack, stopMusic } from "@/lib/music";
 import { createPortal } from "react-dom";
 import { CHRISTENING as c, DETAILS, LETTER, greetingFor, directionsLinkFor, wazeLinkFor } from "@/lib/christening";
 import { EVENT } from "@/lib/event";
@@ -59,6 +60,7 @@ const MOBILE: { x: number; len: number; d: number; dl: number; kind: "star" | "m
 
   export default function Christening({ onContinue, godparent }: { onContinue: () => void; godparent?: Godparent | null }) {
   const [dirOpen, setDirOpen] = useState(false);
+  useEffect(() => { ensureTrack("christening"); }, []);
   return (
     <main className="cx-screen">
       <h1 className="cx-sr">Baptism of our son, Enzo Luan, November 21, 2026</h1>
@@ -168,7 +170,7 @@ const MOBILE: { x: number; len: number; d: number; dl: number; kind: "star" | "m
           <span className="cx-ico" aria-hidden="true">📍</span> Tap for venue directions <span aria-hidden="true">›</span>
         </span>
       </button>
-        <button type="button" className="cx-go" onClick={onContinue}>
+        <button type="button" className="cx-go" onClick={() => { stopMusic(); onContinue(); }}>   
         <span className="cx-ico" aria-hidden="true">🎂</span> {c.continueLabel} <span aria-hidden="true">›</span>
         </button>
         <p className="cx-after">We look forward to sharing this special day with you.</p>

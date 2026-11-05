@@ -199,6 +199,7 @@ export default function RsvpForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: name.trim(),
+          title: godparent?.title ?? "",   // 
           attending,
           bringAdult: going && bringAdult === "yes",
           adults: going && bringAdult === "yes" ? adults.map((n) => n.trim()) : [],

@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import Image from "next/image";
-
+import { startMusic } from "@/lib/music";
 
 export default function Envelope({ onOpened }: { onOpened: () => void }) {
   const [open, setOpen] = useState(false);
@@ -16,6 +16,7 @@ export default function Envelope({ onOpened }: { onOpened: () => void }) {
 
   function handleOpen() {
     if (open) return;
+    startMusic();   // must run directly inside the tap, or phones block the audio
     setOpen(true);
     timers.current.push(window.setTimeout(() => setPresent(true), 1900));
     timers.current.push(window.setTimeout(onOpened, 2800));

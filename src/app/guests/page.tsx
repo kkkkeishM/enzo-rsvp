@@ -2,9 +2,11 @@
 import { useMemo, useState } from "react";
 
 type Relation = "family" | "friend" | null;
+type Sponsor = "ninang" | "ninong" | null;
 type Guest = {
   id: string; name: string; attending: "yes" | "no"; count: number; notes: string; at: string;
   adults: string[]; kids: string[]; invite: string | null; relation: Relation; adminNote: string;
+  sponsor: Sponsor;
 };
 type View = "replies" | "people";
 type Filter = "all" | "yes" | "no";
@@ -79,7 +81,30 @@ export default function GuestsPage() {
     load();
   }
 
-  async function patch(id: string, body: { relation?: Relation; adminNote?: string }) {
+  async function removeAll() {
+    if (!guests || guests.length === 0) return;
+    const typed = prompt(
+      `This permanently deletes all ${guests.length} replies and frees every spot.\nTip: download the CSV first.\n\nType DELETE to confirm.`
+    );
+    if (typed !== "DELETE") return;
+    setLoading(true);
+    setNotice("");
+    const results = await Promise.all(
+      guests.map((g) =>
+        fetch("/api/guests", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password, id: g.id }),
+        }).catch(() => null)
+      )
+    );
+    setLoading(false);
+    const failed = results.filter((r) => !r || !r.ok).length;
+    await load();
+    if (failed) setNotice(`${failed} repl${failed === 1 ? "y" : "ies"} couldn’t be deleted. Try again.`);
+  }
+
+  async function patch(id: string, body: { relation?: Relation; adminNote?: string; sponsor?: Sponsor }) {
     const res = await fetch("/api/guests", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -98,6 +123,16 @@ export default function GuestsPage() {
     }
   }
 
+  async function setSponsor(id: string, value: Sponsor) {
+    const before = guests;
+    setNotice("");
+    setGuests((gs) => gs?.map((g) => (g.id === id ? { ...g, sponsor: value } : g)) ?? null);
+    if (!(await patch(id, { sponsor: value }))) {
+      setGuests(before);
+      setNotice("Couldn’t save that change. Did you add the sponsor column in Supabase and update the API route?");
+    }
+  }
+
   async function saveNote(id: string, v: string) {
     const ok = await patch(id, { adminNote: v });
     if (ok) setGuests((gs) => gs?.map((g) => (g.id === id ? { ...g, adminNote: v } : g)) ?? null);
@@ -111,7 +146,13 @@ export default function GuestsPage() {
   const left = Math.max(capacity - headcount, 0);
   const leftClass = left === 0 ? "full" : left <= 10 ? "low" : "ok";
   const shown = useMemo(() => (guests ?? []).filter((g) => filter === "all" || g.attending === filter), [guests, filter]);
+
   const byType = (t: Relation) => going.filter((g) => g.relation === t).reduce((sum, g) => sum + g.count, 0);
+  const repliesOf = (t: Relation) => (guests ?? []).filter((g) => g.relation === t).length;
+  const sponsorStats = (s: "ninang" | "ninong") => ({
+    yes: (guests ?? []).filter((g) => g.sponsor === s && g.attending === "yes").length,
+    no: (guests ?? []).filter((g) => g.sponsor === s && g.attending === "no").length,
+  });
 
   const people = useMemo(() => {
     const rows: { who: string; role: string; group: string }[] = [];
@@ -129,8 +170,11 @@ export default function GuestsPage() {
     if (!guests) return;
     const esc = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
     const rows = [
-      ["Name", "Type", "Attending", "People", "Adult guests", "Kids", "Guest notes", "My notes", "Invite code", "Answered"],
-      ...guests.map((g) => [g.name, g.relation ?? "", g.attending, g.count, g.adults.join("; "), g.kids.join("; "), g.notes, g.adminNote, g.invite ?? "", g.at]),
+      ["Name", "Type", "Ninang/Ninong", "Attending", "People", "Adult guests", "Kids", "Guest notes", "My notes", "Invite code", "Answered"],
+      ...guests.map((g) => [
+        g.name, g.relation ?? "", g.sponsor ?? "", g.attending, g.count,
+        g.adults.join("; "), g.kids.join("; "), g.notes, g.adminNote, g.invite ?? "", g.at,
+      ]),
     ];
     const blob = new Blob([rows.map((r) => r.map(esc).join(",")).join("\n")], { type: "text/csv" });
     const a = document.createElement("a");
@@ -176,6 +220,9 @@ export default function GuestsPage() {
               <div className="tools">
                 <button className="btn-sm alt" type="button" onClick={load}>Refresh</button>
                 <button className="btn-sm alt" type="button" onClick={downloadCsv}>Download CSV</button>
+                <button className="btn-sm danger" type="button" onClick={removeAll} disabled={loading || guests.length === 0}>
+                  Delete all
+                </button>
               </div>
             </div>
 
@@ -184,12 +231,12 @@ export default function GuestsPage() {
                 <table className="gtable">
                   <thead>
                     <tr>
-                      <th>#</th><th>Name</th><th>Family / Friend</th><th>Status</th><th className="num">People</th>
+                      <th>#</th><th>Name</th><th>Family / Friend</th><th>Ninang / Ninong</th><th>Status</th><th className="num">People</th>
                       <th>Adult guest</th><th>Kids</th><th>Guest’s notes</th><th>My side notes</th><th>Answered</th><th><span className="sr">Delete</span></th>
                     </tr>
                   </thead>
                   <tbody>
-                    {shown.length === 0 && <tr><td colSpan={11} className="empty">No replies here yet.</td></tr>}
+                    {shown.length === 0 && <tr><td colSpan={12} className="empty">No replies here yet.</td></tr>}
                     {shown.map((g, i) => (
                       <tr key={g.id}>
                         <td>{i + 1}</td>
@@ -200,6 +247,9 @@ export default function GuestsPage() {
                             <option value="family">Family</option>
                             <option value="friend">Friend</option>
                           </select>
+                        </td>
+                        <td>
+                          {g.sponsor ? <span className={`rel ${g.sponsor}`}>{g.sponsor === "ninang" ? "Ninang" : "Ninong"}</span> : "–"}
                         </td>
                         <td><span className={`tag ${g.attending}`}>{g.attending === "yes" ? "Going" : "Can’t make it"}</span></td>
                         <td className="num">{g.attending === "yes" ? g.count : "–"}</td>
@@ -214,12 +264,21 @@ export default function GuestsPage() {
                   </tbody>
                   <tfoot>
                     <tr>
-                      <td colSpan={4}>Total people coming (all replies)</td>
+                      <td colSpan={5}>Total people coming (all replies)</td>
                       <td className="num">{headcount}</td>
                       <td colSpan={6}>of {capacity} spots</td>
                     </tr>
                     <tr>
-                      <td colSpan={11}>People coming by type: Family {byType("family")} · Friends {byType("friend")} · Not set {byType(null)}</td>
+                      <td colSpan={12}>
+                        People coming: Family {byType("family")} · Friends {byType("friend")} · Not set {byType(null)}
+                        {" "}| Replies: Family {repliesOf("family")} · Friends {repliesOf("friend")} · Not set {repliesOf(null)}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td colSpan={12}>
+                        Ninang: {sponsorStats("ninang").yes} coming, {sponsorStats("ninang").no} can’t make it
+                        {" "}· Ninong: {sponsorStats("ninong").yes} coming, {sponsorStats("ninong").no} can’t make it
+                      </td>
                     </tr>
                   </tfoot>
                 </table>

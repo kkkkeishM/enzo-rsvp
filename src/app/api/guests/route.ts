@@ -18,7 +18,7 @@ export async function POST(req: Request) {
   try {
     const { data, error } = await getSupabase()
       .from("rsvps")
-      .select("id,name,attending,guests,notes,updated_at,adults,kids,invite_code,relation,admin_note")
+      .select("id,name,attending,guests,notes,updated_at,adults,kids,invite_code,relation,admin_note,sponsor")
       .order("updated_at", { ascending: false });
     if (error) throw error;
 
@@ -34,6 +34,7 @@ export async function POST(req: Request) {
       invite: (r.invite_code ?? null) as string | null,
       relation: (r.relation ?? null) as "family" | "friend" | null,
       adminNote: (r.admin_note ?? "") as string,
+      sponsor: (r.sponsor ?? null) as "ninang" | "ninong" | null,
     }));
     return NextResponse.json({ guests, capacity: MAX_ATTENDANCE });
   } catch (e) {
@@ -53,7 +54,7 @@ export async function DELETE(req: Request) {
 }
 
 export async function PATCH(req: Request) {
-  const { password, id, relation, adminNote } = await req.json().catch(() => ({}));
+  const { password, id, relation, adminNote, sponsor } = await req.json().catch(() => ({}));
   if (!authorized(password) || typeof id !== "string") {
     return NextResponse.json({ error: "Not allowed" }, { status: 401 });
   }
@@ -68,6 +69,12 @@ export async function PATCH(req: Request) {
   if (adminNote !== undefined) {
     if (typeof adminNote !== "string") return NextResponse.json({ error: "Bad note" }, { status: 400 });
     update.admin_note = adminNote.trim().slice(0, 300);
+  }
+  if (sponsor !== undefined) {
+    if (sponsor !== null && sponsor !== "" && sponsor !== "ninang" && sponsor !== "ninong") {
+      return NextResponse.json({ error: "Bad sponsor" }, { status: 400 });
+    }
+    update.sponsor = sponsor === "ninang" || sponsor === "ninong" ? sponsor : null;
   }
   if (Object.keys(update).length === 0) return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
 

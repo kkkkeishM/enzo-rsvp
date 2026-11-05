@@ -1,11 +1,41 @@
 "use client";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { playWhoosh, preloadWhoosh, stopWhoosh } from "@/lib/sfx";
 
 // Start lights -> car drives across -> two panels slide open -> polaroids drop in.
 // All timing lives in the CSS (wi-* rules). If you change it there, update the two timeouts below.
 export default function WallIntro({ onDone }: { onDone: () => void }) {
   const [hidden, setHidden] = useState(false);
+
+  // whoosh: plays the moment Enzo's face enters the screen
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    preloadWhoosh();
+
+    let raf = 0;
+    let played = false;
+    const LEAD = 25; // px before the face is visible; raise to start the sound earlier
+
+    const check = () => {
+      const car = document.querySelector<HTMLElement>(".wi-car");
+      if (car) {
+        const r = car.getBoundingClientRect();
+        if (r.right > -LEAD && r.left < window.innerWidth) {
+          played = true;
+          playWhoosh();
+          return;
+        }
+      }
+      raf = requestAnimationFrame(check);
+    };
+    raf = requestAnimationFrame(check);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      if (played) stopWhoosh();
+    };
+  }, []);
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
