@@ -15,9 +15,10 @@ function get(t: Track) {
   if (!a) {
     a = new Audio(SRC[t]);
     a.loop = true;
-    a.volume = 0.5;
+    a.volume = 1; // temporarily 1 to test, lower it again later
     a.addEventListener("play", notify);
     a.addEventListener("pause", notify);
+    a.addEventListener("error", () => console.error("Audio failed to load:", SRC[t], a?.error));
     audios[t] = a;
   }
   return a;
@@ -35,8 +36,7 @@ export function playTrack(t: Track) {
   const a = get(t);
   a.currentTime = 0;
   current = t;
-  a.play().catch(() => {});
-  notify();
+  a.play().then(notify).catch((e) => { console.error("Audio play blocked:", e); notify(); });
 }
 
 // only starts the track if it isn't already the current one

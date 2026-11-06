@@ -7,6 +7,8 @@ function names(v: unknown): string[] {
   return v.map((x) => (typeof x === "string" ? x.trim().replace(/\s+/g, " ").slice(0, MAX_NAME_LENGTH) : ""));
 }
 
+const looksLikeTwoNames = (n: string) => /\b(and|or)\b|[&+/,]/i.test(n);
+
 const sponsorFrom = (t?: string | null): "ninang" | "ninong" | null => {
   const s = (t ?? "").toLowerCase();
   if (s.includes("ninang")) return "ninang";
@@ -38,9 +40,8 @@ export async function POST(req: Request) {
   let adults: string[] = [];
   let kids: string[] = [];
   if (attending === "yes") {
-    if (body.bringAdult === true) {
-      adults = names(body.adults);
-      if (adults.length === 0 || adults.some((n) => !n)) return bad("Please enter the full name of each adult guest.");
+    if ([...adults, ...kids].some(looksLikeTwoNames)) {
+      return bad("Please enter one name per box. Use “Add another” for each person.");
     }
     if (body.bringKids === true) {
       kids = names(body.kids);
