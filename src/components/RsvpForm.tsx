@@ -1,14 +1,25 @@
 "use client";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
-import { DEFAULT_LIMITS, MAX_ATTENDANCE, MAX_NAME_LENGTH, type InviteInfo } from "@/lib/limits";
+import { DEFAULT_LIMITS, MAX_ATTENDANCE, MAX_NAME_LENGTH, MAX_KIDS, MIN_CHILD_AGE, MAX_CHILD_AGE, type InviteInfo } from "@/lib/limits";
 import { displayNameFor } from "@/lib/christening";
 import type { Godparent } from "./GodparentName";
 
 type Piece = { left: number; color: string; dur: number; delay: number };
 type Answer = "yes" | "no";
+type Kid = { name: string; age: string };
 const COLORS = ["#e63b2e", "#ffc928", "#1d4f91", "#ffffff", "#15161c"];
+const EMPTY_KID: Kid = { name: "", age: "" };
 
+// "y and x", "A & B", "A, B" count as one box, so we block them
+const looksLikeTwoNames = (n: string) => /\b(and|or)\b|[&+/,]/i.test(n);
+const stripSeparators = (v: string) => v.replace(/[&+/,]/g, "");
+const ONE_NAME_MSG = "One name per box. Tap “Add another” for each person.";
+
+const validAge = (age: string) => {
+  const a = Number(age);
+  return age !== "" && Number.isInteger(a) && a >= MIN_CHILD_AGE && a <= MAX_CHILD_AGE;
+};
 
 function Confetti() {
   const [pieces] = useState<Piece[]>(() =>
@@ -63,6 +74,7 @@ function NameList({
   canAdd: boolean;
   addLabel: string;
 }) {
+  const [focused, setFocused] = useState<number | null>(null);
   return (
     <div className="namelist">
       {names.map((n, i) => (
@@ -70,11 +82,14 @@ function NameList({
           <input
             type="text"
             aria-label={`${label} ${i + 1} full name`}
+            aria-invalid={looksLikeTwoNames(n) && focused !== i}
             placeholder="Name"
             autoComplete="off"
             maxLength={MAX_NAME_LENGTH}
             value={n}
-            onChange={(e) => setNames(names.map((v, j) => (j === i ? e.target.value : v)))}
+            onFocus={() => setFocused(i)}
+            onBlur={() => setFocused(null)}
+            onChange={(e) => setNames(names.map((v, j) => (j === i ? stripSeparators(e.target.value) : v)))}
           />
           {names.length > 1 && (
             <button type="button" className="rm-btn" aria-label={`Remove ${label.toLowerCase()} ${i + 1}`} onClick={() => setNames(names.filter((_, j) => j !== i))}>
@@ -83,8 +98,11 @@ function NameList({
           )}
         </div>
       ))}
-      {max > 1 && (
-        <button type="button" className="add-btn" disabled={!canAdd || names.length >= max} onClick={() => setNames([...names, ""])}>
+      {names.some((n, i) => looksLikeTwoNames(n) && focused !== i) && (
+        <p className="err" role="alert">{names.length < max ? ONE_NAME_MSG : "One name per box."}</p>
+      )}
+      {names.length < max && (
+        <button type="button" className="add-btn" disabled={!canAdd} onClick={() => setNames([...names, ""])}>
           + {addLabel}
         </button>
       )}
@@ -92,9 +110,63 @@ function NameList({
   );
 }
 
+function KidList({
+  kids, setKids, max, canAdd,
+}: {
+  kids: Kid[];
+  setKids: (k: Kid[]) => void;
+  max: number;
+  canAdd: boolean;
+}) {
+  const [focused, setFocused] = useState<number | null>(null);
+  const update = (i: number, patch: Partial<Kid>) =>
+    setKids(kids.map((k, j) => (j === i ? { ...k, ...patch } : k)));
 
-// "y and x", "A & B", "A, B" count as one box, so we block them
-const looksLikeTwoNames = (n: string) => /\b(and|or)\b|[&+/,]/i.test(n);
+  return (
+    <div className="namelist">
+      {kids.map((k, i) => (
+        <div className="name-row" key={i}>
+          <input
+            type="text"
+            aria-label={`Child ${i + 1} full name`}
+            aria-invalid={looksLikeTwoNames(k.name) && focused !== i}
+            placeholder="Name"
+            autoComplete="off"
+            maxLength={MAX_NAME_LENGTH}
+            value={k.name}
+            onFocus={() => setFocused(i)}
+            onBlur={() => setFocused(null)}
+            onChange={(e) => update(i, { name: stripSeparators(e.target.value) })}
+          />
+          <select
+            aria-label={`Child ${i + 1} age`}
+            value={k.age}
+            onChange={(e) => update(i, { age: e.target.value })}
+          >
+            <option value="">Age</option>
+            {Array.from({ length: MAX_CHILD_AGE - MIN_CHILD_AGE + 1 }, (_, n) => MIN_CHILD_AGE + n).map((a) => (
+              <option key={a} value={a}>{a}</option>
+            ))}
+          </select>
+          {kids.length > 1 && (
+            <button type="button" className="rm-btn" aria-label={`Remove child ${i + 1}`} onClick={() => setKids(kids.filter((_, j) => j !== i))}>
+              Remove
+            </button>
+          )}
+        </div>
+      ))}
+      {kids.some((k, i) => looksLikeTwoNames(k.name) && focused !== i) && (
+        <p className="err" role="alert">{kids.length < max ? ONE_NAME_MSG : "One name per box."}</p>
+      )}
+      {kids.length < max && (
+        <button type="button" className="add-btn" disabled={!canAdd} onClick={() => setKids([...kids, { ...EMPTY_KID }])}>
+          + Add another child
+        </button>
+      )}
+      <p className="rsvp-note">Children must be {MIN_CHILD_AGE} to {MAX_CHILD_AGE} years old.</p>
+    </div>
+  );
+}
 
 export default function RsvpForm({
   heading, onWrite, wished, onOpenWall, godparent, alreadyRsvped, onDone,
@@ -111,7 +183,7 @@ export default function RsvpForm({
   const [bringAdult, setBringAdult] = useState<Answer>("no");
   const [adults, setAdults] = useState<string[]>([""]);
   const [bringKids, setBringKids] = useState<Answer>("no");
-  const [kids, setKids] = useState<string[]>([""]);
+  const [kids, setKids] = useState<Kid[]>([{ ...EMPTY_KID }]);
   const [notes, setNotes] = useState("");
   const [error, setError] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "done">("idle");
@@ -121,7 +193,6 @@ export default function RsvpForm({
   const [code, setCode] = useState<string | null>(null);
   const [info, setInfo] = useState<InviteInfo>({ label: null, type: "friend", ...DEFAULT_LIMITS, full: false });
   const [blocked, setBlocked] = useState("");
-  
 
   const lock = useRef(false); // stops double-taps before React re-renders
   const confirmRef = useRef<HTMLButtonElement>(null);
@@ -151,17 +222,22 @@ export default function RsvpForm({
   const party = going ? 1 + adultCount + kidCount : 0;
   const room = info.maxGuests - party;
 
+  // kids are capped at MAX_KIDS even if the invitation allows more
+  const kidsMax = Math.min(info.maxKids, MAX_KIDS);
+  // the real ceiling for this group: you + adults + capped kids, never above the invite total
+  const maxParty = Math.min(info.maxGuests, 1 + info.maxAdults + kidsMax);
+
   const adultsOk = info.maxAdults >= 1 && info.maxGuests - (1 + kidCount) >= 1;
-  const kidsOk = info.maxKids >= 1 && info.maxGuests - (1 + adultCount) >= 1;
+  const kidsOk = kidsMax >= 1 && info.maxGuests - (1 + adultCount) >= 1;
   const name = godparent?.name ?? "";
-  const who = displayNameFor(godparent);  
+  const who = displayNameFor(godparent);
 
   function chooseAttending(v: Answer) {
     setAttending(v);
     setNotes("");
     if (v === "no") {
       setBringAdult("no"); setAdults([""]);
-      setBringKids("no"); setKids([""]);
+      setBringKids("no"); setKids([{ ...EMPTY_KID }]);
     }
   }
   function chooseAdult(v: Answer) {
@@ -170,7 +246,7 @@ export default function RsvpForm({
   }
   function chooseKids(v: Answer) {
     setBringKids(v);
-    setKids([""]);
+    setKids([{ ...EMPTY_KID }]);
   }
 
   function validate(): string {
@@ -179,10 +255,12 @@ export default function RsvpForm({
     if (!going && !notes.trim()) return "Please tell us why you can’t make it.";
     if (!going) return "";
     if (bringAdult === "yes" && adults.some(looksLikeTwoNames)) return "Please enter one name per box. Tap “Add another adult” for each person.";
-    if (bringKids === "yes" && kids.some(looksLikeTwoNames)) return "Please enter one name per box. Tap “Add another child” for each child.";
+    if (bringKids === "yes" && kids.some((k) => looksLikeTwoNames(k.name))) return "Please enter one name per box. Tap “Add another child” for each child.";
     if (bringAdult === "yes" && adults.some((n) => !n.trim())) return "Enter the name of your adult guest.";
-    if (bringKids === "yes" && kids.some((n) => !n.trim())) return "Enter the name of every child, or remove the empty fields.";
-    if (party > info.maxGuests) return `Your invitation includes up to ${info.maxGuests} guests, including you.`;
+    if (bringKids === "yes" && kids.some((k) => !k.name.trim())) return "Enter the name of every child, or remove the empty fields.";
+    if (bringKids === "yes" && kids.some((k) => !validAge(k.age))) return `Select an age for every child. Children must be ${MIN_CHILD_AGE} to ${MAX_CHILD_AGE} years old.`;
+    if (bringKids === "yes" && kids.length > kidsMax) return `You can bring up to ${kidsMax} ${kidsMax === 1 ? "child" : "kids"}.`;
+    if (party > info.maxGuests) return `Your invitation includes up to ${maxParty} guests, including you.`;
     return "";
   }
 
@@ -205,12 +283,12 @@ export default function RsvpForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: name.trim(),
-          title: godparent?.title ?? "",   // 
+          title: godparent?.title ?? "",
           attending,
           bringAdult: going && bringAdult === "yes",
           adults: going && bringAdult === "yes" ? adults.map((n) => n.trim()) : [],
           bringKids: going && bringKids === "yes",
-          kids: going && bringKids === "yes" ? kids.map((n) => n.trim()) : [],
+          kids: going && bringKids === "yes" ? kids.map((k) => ({ name: k.name.trim(), age: Number(k.age) })) : [],
           notes: notes.trim(),
           code,
         }),
@@ -256,7 +334,7 @@ export default function RsvpForm({
 
   if (status === "done") {
     const first = name.trim().split(" ")[0];
-    const short = [godparent?.title, first].filter(Boolean).join(" ");  
+    const short = [godparent?.title, first].filter(Boolean).join(" ");
     return (
       <div className="done" role="status">
         {going && <Confetti />}
@@ -317,7 +395,7 @@ export default function RsvpForm({
 
         {going && (
           <>
-            <p className="allow">Your invitation includes up to {info.maxGuests} {info.maxGuests === 1 ? "guest" : "guests"}, including you.</p>
+            <p className="allow">Your invitation includes up to {maxParty} {maxParty === 1 ? "guest" : "guests"}, including you.</p>
 
             <div>
               <span className="legend">{info.maxAdults === 1 ? "Are you bringing one adult guest?" : `Are you bringing adult guests? (up to ${info.maxAdults})`}</span>
@@ -328,14 +406,14 @@ export default function RsvpForm({
             </div>
 
             <div>
-              <span className="legend">Are you bringing kids?{info.maxKids > 0 ? ` (up to ${info.maxKids})` : ""}</span>
+              <span className="legend">Are you bringing kids?{kidsMax > 0 ? ` (up to ${kidsMax}, ages ${MIN_CHILD_AGE}–${MAX_CHILD_AGE})` : ""}</span>
               <YesNo name="kids" value={bringKids} onChange={chooseKids} disableYes={!kidsOk} />
               {bringKids === "yes" && (
-                <NameList label="Child" names={kids} setNames={setKids} max={info.maxKids} canAdd={room > 0} addLabel="Add another child" />
+                <KidList kids={kids} setKids={setKids} max={kidsMax} canAdd={room > 0} />
               )}
             </div>
 
-            <p className="party-line">Total in your group: <b>{party}</b> of {info.maxGuests}</p>
+            <p className="party-line">Total in your group: <b>{party}</b> of {maxParty}</p>
           </>
         )}
 
@@ -384,7 +462,7 @@ export default function RsvpForm({
                 {going ? (
                   <>
                     <div><dt>Adult guest{adultCount > 1 ? "s" : ""}</dt><dd>{adultCount ? adults.map((n) => n.trim()).join(", ") : "None"}</dd></div>
-                    <div><dt>Kids</dt><dd>{kidCount ? kids.map((n) => n.trim()).join(", ") : "None"}</dd></div>
+                    <div><dt>Kids</dt><dd>{kidCount ? kids.map((k) => `${k.name.trim()} (${k.age})`).join(", ") : "None"}</dd></div>
                   </>
                 ) : (
                   <>

@@ -477,6 +477,35 @@ body.invite-lock {
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
 @media (prefers-reduced-motion:reduce){.slide.active .slide-body,.nav-next{animation:none}.confetti{display:none}}
 
+
+.rsvp-form .name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rsvp-form .name-row input[type="text"] {
+  flex: 1 1 0;
+  min-width: 0;   /* lets the input shrink instead of overflowing */
+  width: auto;
+}
+
+.rsvp-form .name-row select {
+  flex: 0 0 5.5rem;
+  width: 5.5rem;  /* overrides any width: 100% on selects */
+}
+
+.rsvp-form .name-row .rm-btn {
+  flex: 0 0 auto;
+}
+
+
+@media (max-width: 420px) {
+  .rsvp-form .name-row { flex-wrap: wrap; }
+  .rsvp-form .name-row input[type="text"] { flex: 1 1 100%; }
+  .rsvp-form .name-row select { flex: 1 1 auto; }
+}
+
 /* spacing between the sentences on the confirmation card */
 .done h2{margin-bottom:18px}
 .done p{margin:0 0 10px;line-height:1.55}
@@ -1381,3 +1410,15 @@ button.cx-info:active{
 .btn-sm:disabled{opacity:.6;cursor:wait}
 .rel.ninang{background:#ffd6e8}
 .rel.ninong{background:#c9e7ff}
+
+
+.rsvp-form .name-row{display:flex;align-items:center;gap:.5rem}
+.rsvp-form .name-row input[type=text]{flex:1 1 0;min-width:0;width:auto}
+.rsvp-form .name-row select{flex:0 0 5.5rem;width:5.5rem}
+.rsvp-form .name-row .rm-btn{flex:0 0 auto}
+
+@media (max-width:420px){
+  .rsvp-form .name-row{flex-wrap:wrap}
+  .rsvp-form .name-row input[type=text]{flex:1 1 100%}
+  .rsvp-form .name-row select{flex:1 1 auto;width:auto}
+}

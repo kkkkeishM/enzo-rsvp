@@ -1,10 +1,24 @@
 import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
-import { MAX_NAME_LENGTH } from "@/lib/limits";
+import { MAX_NAME_LENGTH, MAX_KIDS, MIN_CHILD_AGE, MAX_CHILD_AGE } from "@/lib/limits";
+
+function clean(x: unknown): string {
+  return typeof x === "string" ? x.trim().replace(/\s+/g, " ").slice(0, MAX_NAME_LENGTH) : "";
+}
 
 function names(v: unknown): string[] {
   if (!Array.isArray(v)) return [];
-  return v.map((x) => (typeof x === "string" ? x.trim().replace(/\s+/g, " ").slice(0, MAX_NAME_LENGTH) : ""));
+  return v.map(clean);
+}
+
+type ChildIn = { name: string; age: number };
+
+function parseKids(v: unknown): ChildIn[] {
+  if (!Array.isArray(v)) return [];
+  return v.map((x) => {
+    const o = (x ?? {}) as Record<string, unknown>;
+    return { name: clean(o.name), age: Number(o.age) };
+  });
 }
 
 const looksLikeTwoNames = (n: string) => /\b(and|or)\b|[&+/,]/i.test(n);
@@ -26,7 +40,7 @@ export async function POST(req: Request) {
     return bad("Bad request");
   }
 
-  const name = typeof body.name === "string" ? body.name.trim().replace(/\s+/g, " ").slice(0, MAX_NAME_LENGTH) : "";
+  const name = clean(body.name);
   const attending = body.attending === "yes" ? "yes" : body.attending === "no" ? "no" : null;
   const notes = typeof body.notes === "string" ? body.notes.trim().slice(0, 300) : "";
   const code = typeof body.code === "string" && body.code.trim() ? body.code.trim().slice(0, 64) : null;
@@ -38,16 +52,34 @@ export async function POST(req: Request) {
   }
 
   let adults: string[] = [];
-  let kids: string[] = [];
+  let kids: string[] = []; // stored as "Name (age)" so submit_rsvp keeps working unchanged
+
   if (attending === "yes") {
-    if ([...adults, ...kids].some(looksLikeTwoNames)) {
+    if (body.bringAdult === true) {
+      adults = names(body.adults);
+      if (adults.length === 0 || adults.some((n) => !n)) return bad("Please enter the full name of your adult guest.");
+    }
+
+    if (body.bringKids === true) {
+      const kidsIn = parseKids(body.kids);
+      if (kidsIn.length === 0) return bad("Please enter the name and age of each child.");
+      if (kidsIn.length > MAX_KIDS) return bad(`You can bring up to ${MAX_KIDS} kids.`);
+      for (const k of kidsIn) {
+        if (!k.name) return bad("Please enter the full name of each child.");
+        if (!Number.isInteger(k.age) || k.age < MIN_CHILD_AGE || k.age > MAX_CHILD_AGE) {
+          return bad(`Each child needs an age from ${MIN_CHILD_AGE} to ${MAX_CHILD_AGE}.`);
+        }
+      }
+      if (kidsIn.some((k) => looksLikeTwoNames(k.name))) {
+        return bad("Please enter one name per box. Use “Add another” for each person.");
+      }
+      kids = kidsIn.map((k) => `${k.name} (${k.age})`);
+    }
+
+    if (adults.some(looksLikeTwoNames)) {
       return bad("Please enter one name per box. Use “Add another” for each person.");
     }
-    if (body.bringKids === true) {
-      kids = names(body.kids);
-      if (kids.length === 0 || kids.some((n) => !n)) return bad("Please enter the full name of each child.");
-    }
-    if (adults.length > 10 || kids.length > 10) return bad("Too many guests.");
+    if (adults.length > 10) return bad("Too many guests.");
   }
 
   try {
