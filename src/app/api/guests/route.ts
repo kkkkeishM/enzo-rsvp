@@ -54,7 +54,7 @@ export async function DELETE(req: Request) {
 }
 
 export async function PATCH(req: Request) {
-  const { password, id, relation, adminNote, sponsor } = await req.json().catch(() => ({}));
+  const { password, id, relation, adminNote, sponsor, count } = await req.json().catch(() => ({}));
   if (!authorized(password) || typeof id !== "string") {
     return NextResponse.json({ error: "Not allowed" }, { status: 401 });
   }
@@ -76,6 +76,27 @@ export async function PATCH(req: Request) {
     }
     update.sponsor = sponsor === "ninang" || sponsor === "ninong" ? sponsor : null;
   }
+
+  // manual total: replaces the guest's own count (stored in the "guests" column)
+  if (count !== undefined) {
+    const n = Number(count);
+    if (!Number.isInteger(n) || n < 1 || n > 99) {
+      return NextResponse.json({ error: "Bad total" }, { status: 400 });
+    }
+    const { data: row, error: readError } = await getSupabase()
+      .from("rsvps")
+      .select("attending,adults,kids")
+      .eq("id", id)
+      .single();
+    if (readError || !row) return NextResponse.json({ error: "Reply not found" }, { status: 404 });
+    if (!row.attending) return NextResponse.json({ error: "That guest isn’t coming" }, { status: 400 });
+    const named = 1 + ((row.adults ?? []) as string[]).length + ((row.kids ?? []) as string[]).length;
+    if (n < named) {
+      return NextResponse.json({ error: `Total can’t be lower than ${named}` }, { status: 400 });
+    }
+    update.guests = n;
+  }
+
   if (Object.keys(update).length === 0) return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
 
   const { error } = await getSupabase().from("rsvps").update(update).eq("id", id);

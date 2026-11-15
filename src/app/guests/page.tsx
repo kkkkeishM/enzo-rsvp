@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type Relation = "family" | "friend" | null;
 type Sponsor = "ninang" | "ninong" | null;
@@ -34,6 +34,45 @@ function NoteCell({ name, value, onSave }: { name: string; value: string; onSave
         maxLength={300}
         placeholder="Add a note..."
         aria-label={`Your note about ${name}`}
+        onChange={(e) => setText(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }}
+      />
+      <small className={state}>{state === "saving" ? "Saving..." : state === "saved" ? "Saved ✓" : state === "error" ? "Not saved" : ""}</small>
+    </div>
+  );
+}
+
+function TotalCell({ name, value, min, onSave }: { name: string; value: number; min: number; onSave: (v: number) => Promise<boolean> }) {
+  const [text, setText] = useState(String(value));
+  const [state, setState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+
+  useEffect(() => { setText(String(value)); }, [value]); // follow Refresh
+
+  async function commit() {
+    const n = Number(text);
+    if (!Number.isInteger(n) || n < min || n > 99) {
+      setText(String(value));
+      setState("error");
+      return;
+    }
+    if (n === value) return;
+    setState("saving");
+    const ok = await onSave(n);
+    if (!ok) setText(String(value));
+    setState(ok ? "saved" : "error");
+    if (ok) window.setTimeout(() => setState("idle"), 1500);
+  }
+
+  return (
+    <div className="notecell totalcell">
+      <input
+        type="number"
+        inputMode="numeric"
+        min={min}
+        max={99}
+        value={text}
+        aria-label={`Total people for ${name}`}
         onChange={(e) => setText(e.target.value)}
         onBlur={commit}
         onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }}
@@ -104,7 +143,7 @@ export default function GuestsPage() {
     if (failed) setNotice(`${failed} repl${failed === 1 ? "y" : "ies"} couldn’t be deleted. Try again.`);
   }
 
-  async function patch(id: string, body: { relation?: Relation; adminNote?: string; sponsor?: Sponsor }) {
+  async function patch(id: string, body: { relation?: Relation; adminNote?: string; sponsor?: Sponsor; count?: number }) {
     const res = await fetch("/api/guests", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -137,6 +176,14 @@ export default function GuestsPage() {
     const ok = await patch(id, { adminNote: v });
     if (ok) setGuests((gs) => gs?.map((g) => (g.id === id ? { ...g, adminNote: v } : g)) ?? null);
     else setNotice("Couldn’t save the note. Did you run the add-relation-notes SQL in Supabase?");
+    return ok;
+  }
+
+  async function saveTotal(id: string, n: number) {
+    setNotice("");
+    const ok = await patch(id, { count: n });
+    if (ok) setGuests((gs) => gs?.map((g) => (g.id === id ? { ...g, count: n } : g)) ?? null);
+    else setNotice("Couldn’t save the total. Did you update the API route to accept count?");
     return ok;
   }
 
@@ -252,7 +299,17 @@ export default function GuestsPage() {
                           {g.sponsor ? <span className={`rel ${g.sponsor}`}>{g.sponsor === "ninang" ? "Ninang" : "Ninong"}</span> : "–"}
                         </td>
                         <td><span className={`tag ${g.attending}`}>{g.attending === "yes" ? "Going" : "Can’t make it"}</span></td>
-                        <td className="num">{g.attending === "yes" ? g.count : "–"}</td>
+                        <td className="num">
+                          {g.attending === "yes" ? (
+                            <TotalCell
+                              key={g.id}
+                              name={g.name}
+                              value={g.count}
+                              min={1 + g.adults.length + g.kids.length}
+                              onSave={(n) => saveTotal(g.id, n)}
+                            />
+                          ) : "–"}
+                        </td>
                         <td>{g.attending === "yes" ? lines(g.adults) : "–"}</td>
                         <td>{g.attending === "yes" ? lines(g.kids) : "–"}</td>
                         <td className="notes">{g.notes || "–"}</td>
