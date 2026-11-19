@@ -1782,51 +1782,157 @@ button.cx-info:active{
   color: #0f5c3a;
 }
 
-/* ===== Mobile guest table fix ===== */
+
+/* ===== Mobile guest table layout ===== */
 @media (max-width: 1000px) {
+
+  .admin .table-wrap {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto !important;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+  }
+
   .admin .gtable {
-    min-width: 1100px !important;
-    width: 1100px !important;
-    table-layout: fixed;
+    width: 1800px !important;
+    min-width: 1800px !important;
+    table-layout: fixed !important;
+    border-collapse: collapse;
   }
 
-  /* Number column */
-  .admin .gtable th:first-child,
-  .admin .gtable td:first-child {
-    width: 40px !important;
-    min-width: 40px !important;
+  /* Make column sizing consistent */
+  .admin .gtable th,
+  .admin .gtable td {
+    box-sizing: border-box;
+    vertical-align: middle;
+    overflow-wrap: break-word;
   }
 
-  /* Name column */
-  .admin .gtable th.nm,
-  .admin .gtable td.nm {
-    width: 150px !important;
-    min-width: 150px !important;
-    white-space: nowrap !important;
+  /* 1. Number */
+  .admin .gtable th:nth-child(1),
+  .admin .gtable td:nth-child(1) {
+    width: 45px !important;
+  }
+
+  /* 2. Name */
+  .admin .gtable th:nth-child(2),
+  .admin .gtable td:nth-child(2) {
+    width: 220px !important;
   }
 
   .admin .gtable td.nm .chk {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 150px !important;
-    white-space: nowrap !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 100%;
+    min-width: 0;
+    white-space: nowrap;
   }
 
   .admin .gtable td.nm .chk span {
-    white-space: nowrap !important;
-    word-break: keep-all !important;
-    overflow-wrap: normal !important;
+    flex: 1;
     min-width: 0;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
   }
 
-  /* Family / Friend dropdown */
-  .admin .gtable td .rel {
-    min-width: 170px;
+  /* 3. Family / Friend */
+  .admin .gtable th:nth-child(3),
+  .admin .gtable td:nth-child(3) {
+    width: 190px !important;
   }
 
-  /* Notes */
-  .admin .gtable .notecell {
-    min-width: 170px !important;
+  .admin .gtable td:nth-child(3) select {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100%;
+    box-sizing: border-box;
   }
+
+  /* 4. Ninang / Ninong */
+  .admin .gtable th:nth-child(4),
+  .admin .gtable td:nth-child(4) {
+    width: 130px !important;
+  }
+
+  /* 5. Status */
+  .admin .gtable th:nth-child(5),
+  .admin .gtable td:nth-child(5) {
+    width: 140px !important;
+  }
+
+  /* 6. People */
+  .admin .gtable th:nth-child(6),
+  .admin .gtable td:nth-child(6) {
+    width: 85px !important;
+  }
+
+  /* 7. Adult guests */
+  .admin .gtable th:nth-child(7),
+  .admin .gtable td:nth-child(7) {
+    width: 170px !important;
+  }
+
+  /* 8. Kids */
+  .admin .gtable th:nth-child(8),
+  .admin .gtable td:nth-child(8) {
+    width: 150px !important;
+  }
+
+  /* 9. Guest's notes */
+  .admin .gtable th:nth-child(9),
+  .admin .gtable td:nth-child(9) {
+    width: 190px !important;
+  }
+
+  /* 10. My side notes */
+  .admin .gtable th:nth-child(10),
+  .admin .gtable td:nth-child(10) {
+    width: 210px !important;
+  }
+
+  .admin .gtable td:nth-child(10) .notecell {
+    width: 100%;
+    min-width: 0 !important;
+    box-sizing: border-box;
+  }
+
+  .admin .gtable td:nth-child(10) .notecell textarea {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+    resize: vertical;
+    overflow-wrap: break-word;
+  }
+
+  /* 11. Answered */
+  .admin .gtable th:nth-child(11),
+  .admin .gtable td:nth-child(11) {
+    width: 160px !important;
+  }
+
+  .admin .gtable td.when {
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: normal;
+    line-height: 1.5;
+  }
+
+  /* 12. Actions */
+  .admin .gtable th:nth-child(12),
+  .admin .gtable td:nth-child(12) {
+    width: 110px !important;
+  }
+
+  .admin .gtable .rowact {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    white-space: nowrap;
+  }
+
 }
