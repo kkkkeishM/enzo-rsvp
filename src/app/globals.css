@@ -2330,3 +2330,115 @@ button.cx-info:active{
   .stats{grid-template-columns:repeat(2,1fr)}
   .stats .stat:nth-child(5){grid-column:1 / -1}   /* the odd card fills the last row */
 }
+
+/* ===== Wishes admin ===== */
+.wnameview{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.wnameview span{min-width:0;overflow-wrap:anywhere}
+.wnameedit{display:grid;gap:6px;min-width:0}
+.wnameedit .acts{display:flex;flex-wrap:wrap;gap:6px}
+.wnameedit .btn-sm{font-size:.8rem;padding:.25em .8em;border-width:2px;box-shadow:0 2px 0 #15161c}
+.wnameedit small.error{color:#c0392b}
+.wmsg{white-space:pre-wrap;overflow-wrap:anywhere}
+.wactions{display:flex;gap:18px}
+
+/* on phones: one tap-to-open card per wish */
+@media (max-width:900px){
+  .admin .wtable{display:block!important;width:100%!important;min-width:0!important;max-width:100%!important;table-layout:auto!important}
+  .admin .wtable thead{display:none!important}
+  .admin .wtable tbody{display:block;width:100%}
+  .admin .wtable tbody tr:not(.wcard) td{display:block;width:100%!important;text-align:center;padding:1em}
+
+  /* collapsed card: number, name, status + arrow */
+  .admin .wtable tbody tr.wcard,
+  .admin .wtable tbody tr.wcard:nth-child(even){
+    display:grid;
+    grid-template-columns:1.6rem minmax(0,1fr) auto;
+    align-items:center;
+    column-gap:8px;
+    width:100%;
+    margin:0 0 8px;
+    padding:8px 10px;
+    background:#fff;
+    border:3px solid #15161c;
+    border-radius:14px;
+    box-shadow:0 3px 0 #15161c;
+  }
+  .admin .wtable tbody tr.wcard > td{
+    display:none;
+    width:auto!important;min-width:0!important;max-width:none!important;
+    padding:0;border:0;box-sizing:border-box;
+    font-size:.9rem;line-height:1.35;
+  }
+  .admin .wtable tbody tr.wcard > td:nth-child(1){display:block;grid-column:1;grid-row:1;font-size:.8rem;color:#5a5f6b}
+  .admin .wtable tbody tr.wcard > td:nth-child(2){display:block;grid-column:2;grid-row:1}
+  .admin .wtable tbody tr.wcard > td:nth-child(4){
+    display:flex;align-items:center;justify-content:flex-end;gap:8px;
+    grid-column:3;grid-row:1;
+  }
+
+  /* the arrow */
+  .admin .wtable .rowtoggle{
+    display:inline-grid;place-items:center;flex:none;
+    width:30px;height:30px;padding:0;
+    background:#ffc928;border:2px solid #15161c;border-radius:50%;
+    box-shadow:0 2px 0 #15161c;cursor:pointer;
+  }
+  .admin .wtable .rowtoggle svg{
+    width:16px;height:16px;fill:none;stroke:#15161c;stroke-width:3;
+    stroke-linecap:round;stroke-linejoin:round;transition:transform .2s;
+  }
+  .admin .wtable tr.open .rowtoggle svg{transform:rotate(180deg)}
+
+  /* open card: Wish, Sent, Actions as labelled rows */
+  .admin .wtable tbody tr.wcard.open > td:nth-child(3),
+  .admin .wtable tbody tr.wcard.open > td:nth-child(5),
+  .admin .wtable tbody tr.wcard.open > td:nth-child(6){
+    display:grid;
+    grid-template-columns:5rem minmax(0,1fr);
+    column-gap:10px;
+    align-items:start;
+    grid-column:1 / -1;
+    padding:7px 0;
+    border-top:1px dashed #d9dce3;
+    text-align:left;
+  }
+  .admin .wtable tbody tr.wcard.open > td:nth-child(3)::before,
+  .admin .wtable tbody tr.wcard.open > td:nth-child(5)::before,
+  .admin .wtable tbody tr.wcard.open > td:nth-child(6)::before{
+    content:attr(data-label);
+    font-weight:800;font-size:.7rem;line-height:1.35;
+    letter-spacing:.04em;text-transform:uppercase;color:#5a5f6b;
+    padding-top:.15em;
+  }
+  .admin .wtable tbody tr.wcard.open > td > div{grid-column:2;min-width:0}
+  .admin .wtable td.when{white-space:normal;font-size:.85rem}
+}
+
+/* wishes admin: small pencil icon instead of an "Edit" word */
+.wnameview{align-items:center;justify-content:flex-start;gap:8px}
+.wnameview span{flex:0 1 auto}
+.wedit{
+  flex:none;
+  display:inline-grid;
+  place-items:center;
+  width:26px;
+  height:26px;
+  padding:0;
+  background:#fff;
+  border:2px solid #1d4f91;
+  border-radius:50%;
+  cursor:pointer;
+  transition:background .15s,transform .12s;
+}
+.wedit svg{
+  width:13px;
+  height:13px;
+  fill:none;
+  stroke:#1d4f91;
+  stroke-width:2.4;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.wedit:hover{background:#eef4ff}
+.wedit:active{transform:scale(.9)}
+.wedit:focus-visible{outline:3px solid #1d4f91;outline-offset:2px}
