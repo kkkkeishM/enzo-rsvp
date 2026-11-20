@@ -1936,3 +1936,58 @@ button.cx-info:active{
   }
 
 }
+
+
+/* required guests: numbered rows, tags lined up in one column */
+.admin .reqbox .reqcol ol{
+  list-style:none;
+  counter-reset:req;
+  padding-left:0;
+  max-width:26rem;            /* keeps the tags close to the names on wide screens too */
+}
+.admin .reqbox .reqcol li{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  counter-increment:req;
+}
+.admin .reqbox .reqcol li::before{
+  content:counter(req) ".";
+  flex:none;
+  min-width:1.9em;
+  font-weight:600;
+  color:var(--req-accent);
+}
+.admin .reqbox .reqcol li > span:first-child{
+  flex:0 1 auto;
+  min-width:0;
+  margin-right:0;
+  overflow-wrap:anywhere;
+}
+.admin .reqbox .reqcol li .reqicon{flex:none;margin-left:0}
+.admin .reqbox .reqcol li .reqtag{
+  float:none;
+  flex:none;
+  margin-left:auto;           /* pushes every tag to the same right edge */
+}
+
+/* on phones the table is 1800px wide, so keep the panel screen-sized and pinned left */
+@media (max-width:1000px){
+  .admin .reqbox{
+    position:sticky;
+    left:0;
+    width:calc(100vw - 40px);
+    box-sizing:border-box;
+  }
+  .admin .reqbox .reqcol li{font-size:.9rem}
+  .admin .reqbox .reqcol li .reqtag{font-size:.7rem;padding:2px 7px}
+}
+
+
+.admin .reqbox .reqcol li > span:first-child{
+  flex:1 1 auto;
+  min-width:0;
+  margin-right:0;
+  overflow-wrap:anywhere;
+}
+.admin .reqbox .reqcol li .reqicon{margin-left:6px}

@@ -370,6 +370,26 @@ function RequiredSponsors({ guests, locked }: { guests: Guest[]; locked: boolean
                       if (e.key === "Escape") setEditing(null);
                     }}
                   />
+                  <>
+                  <span>
+                    {r.n}
+                    {aliases[r.n] && <small className="reqalias"> → {aliases[r.n]}</small>}
+                    <button
+                      type="button"
+                      className="reqicon"
+                      disabled={locked}
+                      title={locked ? "Locked" : "Edit name"}
+                      aria-label={`Edit the RSVP name for ${r.n}`}
+                      onClick={() => { setEditing(r.n); setDraft(aliases[r.n] ?? r.n); }}
+                    >
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 20h9" />
+                        <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                      </svg>
+                    </button>
+                  </span>
+                  <span className={`reqtag ${r.s.key}`}>{r.s.label}</span>
+                </>
                   <button type="button" className="reqbtn save" onClick={() => saveAlias(r.n, draft)}>Save</button>
                   <button type="button" className="reqbtn" onClick={() => setEditing(null)}>Cancel</button>
                 </span>
