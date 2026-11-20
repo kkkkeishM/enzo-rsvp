@@ -7,7 +7,7 @@ type Sponsor = "ninang" | "ninong" | null;
 type Guest = {
   id: string; name: string; attending: "yes" | "no"; count: number; notes: string; at: string;
   adults: string[]; kids: string[]; invite: string | null; relation: Relation; adminNote: string;
-  sponsor: Sponsor; side: Side; present: boolean;
+  sponsor: Sponsor; side: Side; present: boolean; missing: number; missingNote: string;
 };
 type NewGuest = {
   name: string; attending: "yes" | "no"; count: number; relation: Relation; side: Side; sponsor: Sponsor;
@@ -279,8 +279,106 @@ function AddGuestPanel({ onAdd, onClose }: { onAdd: (g: NewGuest) => Promise<str
   );
 }
 
+// who is not with a checked-in guest at the party
+function MissingCell({ name, max, missing, note, onSave }: { name: string; max: number; missing: number; note: string; onSave: (n: number, note: string) => Promise<boolean> }) {
+  const [num, setNum] = useState(String(missing));
+  const [text, setText] = useState(note);
+  const [state, setState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+
+  useEffect(() => { setNum(String(missing)); setText(note); }, [missing, note]); // follow Refresh
+
+  async function commit() {
+    const n = Number(num);
+    if (!Number.isInteger(n) || n < 0 || n > max) {
+      setNum(String(missing));
+      setState("error");
+      return;
+    }
+    const t = n === 0 ? "" : text.trim();
+    if (n === missing && t === note) return;
+    setState("saving");
+    const ok = await onSave(n, t);
+    if (!ok) { setNum(String(missing)); setText(note); }
+    setState(ok ? "saved" : "error");
+    if (ok) window.setTimeout(() => setState("idle"), 1500);
+  }
+
+  if (max < 1) return <small>Just them</small>;
+
+  return (
+    <div className="misscell">
+      <label>
+        <span>Not with them</span>
+        <input
+          type="number"
+          inputMode="numeric"
+          min={0}
+          max={max}
+          value={num}
+          aria-label={`How many of ${name}'s group are not here`}
+          onChange={(e) => setNum(e.target.value)}
+          onBlur={commit}
+          onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }}
+        />
+      </label>
+      {Number(num) > 0 && (
+        <input
+          type="text"
+          className="missnote"
+          value={text}
+          maxLength={300}
+          placeholder="Who’s missing?"
+          aria-label={`Who is missing from ${name}'s group`}
+          onChange={(e) => setText(e.target.value)}
+          onBlur={commit}
+          onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }}
+        />
+      )}
+      <small className={state}>{state === "saving" ? "Saving..." : state === "saved" ? "Saved ✓" : state === "error" ? "Not saved" : ""}</small>
+    </div>
+  );
+}
+
+// summary of everyone who said yes but is not at the party
+function NotPresent({ guests, total }: { guests: Guest[]; total: number }) {
+  const notHere = guests.filter((g) => !g.present);
+  const partial = guests.filter((g) => g.present && g.missing > 0);
+  return (
+    <details className="notpres">
+      <summary>
+        Not present at the party: <b>{total} people</b> ({notHere.length} not checked in, {partial.length} with missing guests)
+      </summary>
+      {notHere.length === 0 && partial.length === 0 ? (
+        <p>Everyone who said yes is here. 🎉</p>
+      ) : (
+        <div className="notgrid">
+          <div>
+            <h4>Not checked in yet ({notHere.length})</h4>
+            <ul>
+              {notHere.map((g) => (
+                <li key={g.id}><b>{g.name}</b> <span>{g.count} {g.count === 1 ? "person" : "people"}</span></li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h4>Checked in, but some are missing ({partial.length})</h4>
+            <ul>
+              {partial.map((g) => (
+                <li key={g.id}>
+                  <b>{g.name}</b> <span>{g.missing} missing</span>
+                  {g.missingNote && <small>{g.missingNote}</small>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+    </details>
+  );
+}
+
 const REQUIRED_NINANG = [
-  "Seanna Valois","Janah Pitchay", "Keith Misa", "Princess Cordero", "Christel Louieji Peralta",
+  "Seanna Valois","Janah Pitchay", "Keith Misa", "Princess Cordero", "Christel Peralta",
   "Jenny Forcadilla", "Alyssa Espejon", "Darlene Anilao", "Marjorie Garcia",
   "Jannah Resultay", "Gherami Mae Solis", "Noella Morales", "Ashly Montecillo",
   "Ronalyn Pelagio", "Princess Caryl Columna",
@@ -370,48 +468,39 @@ function RequiredSponsors({ guests, locked }: { guests: Guest[]; locked: boolean
                       if (e.key === "Escape") setEditing(null);
                     }}
                   />
-                  <>
-                  <span>
-                    {r.n}
-                    {aliases[r.n] && <small className="reqalias"> → {aliases[r.n]}</small>}
-                    <button
-                      type="button"
-                      className="reqicon"
-                      disabled={locked}
-                      title={locked ? "Locked" : "Edit name"}
-                      aria-label={`Edit the RSVP name for ${r.n}`}
-                      onClick={() => { setEditing(r.n); setDraft(aliases[r.n] ?? r.n); }}
-                    >
-                      <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M12 20h9" />
-                        <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
-                      </svg>
-                    </button>
-                  </span>
-                  <span className={`reqtag ${r.s.key}`}>{r.s.label}</span>
-                </>
                   <button type="button" className="reqbtn save" onClick={() => saveAlias(r.n, draft)}>Save</button>
                   <button type="button" className="reqbtn" onClick={() => setEditing(null)}>Cancel</button>
                 </span>
               ) : (
                 <>
                   <span>
-                    {r.n}
+                    {(() => {
+                      const words = r.n.split(" ");
+                      const last = words.pop();
+                      return (
+                        <>
+                          {words.length > 0 && <>{words.join(" ")} </>}
+                          <span className="reqlast">
+                            {last}
+                            <button
+                              type="button"
+                              className="reqicon"
+                              disabled={locked}
+                              title={locked ? "Locked" : "Edit name"}
+                              aria-label={`Edit the RSVP name for ${r.n}`}
+                              onClick={() => { setEditing(r.n); setDraft(aliases[r.n] ?? r.n); }}
+                            >
+                              <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M12 20h9" />
+                                <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                              </svg>
+                            </button>
+                          </span>
+                        </>
+                      );
+                    })()}
                     {aliases[r.n] && <small className="reqalias"> → {aliases[r.n]}</small>}
                   </span>
-                  <button
-                    type="button"
-                    className="reqicon"
-                    disabled={locked}
-                    title={locked ? "Locked" : "Edit name"}
-                    aria-label={`Edit the RSVP name for ${r.n}`}
-                    onClick={() => { setEditing(r.n); setDraft(aliases[r.n] ?? r.n); }}
-                  >
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                      <path d="M12 20h9" />
-                      <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
-                    </svg>
-                  </button>
                   <span className={`reqtag ${r.s.key}`}>{r.s.label}</span>
                 </>
               )}
@@ -458,6 +547,7 @@ export default function GuestsPage() {
   const [unlockError, setUnlockError] = useState("");
   const [addOpen, setAddOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [openId, setOpenId] = useState<string | null>(null); // which guest card is expanded on phones
   const lockedHit = useRef(false);
 
   const LOCKED_MSG = "The guest list is locked. Contact the admin to unlock it.";
@@ -590,7 +680,7 @@ export default function GuestsPage() {
     if (failed) setNotice(`${failed} repl${failed === 1 ? "y" : "ies"} couldn’t be deleted. Try again.`);
   }
 
-  async function patch(id: string, body: { relation?: Relation; side?: Side; adminNote?: string; sponsor?: Sponsor; count?: number; adults?: string[]; present?: boolean }) {
+  async function patch(id: string, body: { relation?: Relation; side?: Side; adminNote?: string; sponsor?: Sponsor; count?: number; adults?: string[]; present?: boolean; missing?: number; missingNote?: string }) {
     const res = await fetch("/api/guests", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -626,11 +716,20 @@ export default function GuestsPage() {
   async function setPresent(id: string, value: boolean) {
     const before = guests;
     setNotice("");
-    setGuests((gs) => gs?.map((g) => (g.id === id ? { ...g, present: value } : g)) ?? null);
+    setGuests((gs) => gs?.map((g) => (g.id === id ? { ...g, present: value, ...(value ? {} : { missing: 0, missingNote: "" }) } : g)) ?? null);
     if (!(await patch(id, { present: value }))) {
       setGuests(before);
       failNotice("Couldn’t save the check-in. Did you add the present column in Supabase and update the API route?");
     }
+  }
+
+  // how many of a checked-in group are not with them, and who (works even when locked)
+  async function saveMissing(id: string, n: number, note: string) {
+    setNotice("");
+    const ok = await patch(id, { missing: n, missingNote: note });
+    if (ok) setGuests((gs) => gs?.map((g) => (g.id === id ? { ...g, missing: n, missingNote: n === 0 ? "" : note } : g)) ?? null);
+    else failNotice("Couldn’t save that. Did you run add-missing.sql in Supabase and update the API route?");
+    return ok;
   }
 
   async function saveNote(id: string, v: string) {
@@ -677,7 +776,9 @@ export default function GuestsPage() {
   const left = Math.max(capacity - headcount, 0);
   const leftClass = left === 0 ? "full" : left <= 10 ? "low" : "ok";
   const presentReplies = going.filter((g) => g.present).length;
-  const presentPeople = going.filter((g) => g.present).reduce((sum, g) => sum + g.count, 0);
+  const here = (g: Guest) => g.count - Math.min(g.missing, g.count - 1);
+  const presentPeople = going.filter((g) => g.present).reduce((sum, g) => sum + here(g), 0);
+  const notPresentPeople = headcount - presentPeople;
   const shown = useMemo(() => (guests ?? []).filter((g) => filter === "all" || g.attending === filter), [guests, filter]);
 
   const byType = (t: Relation) => going.filter((g) => g.relation === t).reduce((sum, g) => sum + g.count, 0);
@@ -788,21 +889,41 @@ export default function GuestsPage() {
               </div>
             </div>
 
+            <section className="sumcard" aria-label="Check-in summary">
+            <h2 className="sumtitle">Track my guests</h2>
+              <div className="sumrow">
+                <div className="sumbox here"><b>{presentPeople}</b><span>present</span></div>
+                <div className="sumbox away"><b>{notPresentPeople}</b><span>not present</span></div>
+                <div className="sumbox"><b>{presentReplies} / {going.length}</b><span>replies checked in</span></div>
+              </div>
+              <div
+                className="sumbar"
+                role="progressbar"
+                aria-valuemin={0}
+                aria-valuemax={headcount}
+                aria-valuenow={presentPeople}
+                aria-label="People present"
+              >
+                <i style={{ width: `${headcount ? Math.min(100, Math.round((presentPeople / headcount) * 100)) : 0}%` }} />
+              </div>
+              <NotPresent guests={going} total={notPresentPeople} />
+            </section>
+
             {addOpen && !locked && <AddGuestPanel onAdd={addGuest} onClose={() => setAddOpen(false)} />}
 
             {view === "replies" ? (
               <div className="table-wrap">
-                <table className="gtable">
+                <table className="gtable greplies">
                   <thead>
                     <tr>
                       <th>#</th><th>Name</th><th>Family / Friend</th><th>Ninang / Ninong</th><th>Status</th><th className="num">People</th>
-                      <th>Adult guest</th><th>Kids</th><th>Guest’s notes</th><th>My side notes</th><th>Answered</th><th><span className="sr">Delete</span></th>
+                      <th>Adult guest</th><th>Kids</th><th>Guest’s notes</th><th>My side notes</th><th>Answered</th><th>At the party</th><th><span className="sr">Delete</span></th>
                     </tr>
                   </thead>
                   <tbody>
-                    {shown.length === 0 && <tr><td colSpan={12} className="empty">No replies here yet.</td></tr>}
+                    {shown.length === 0 && <tr><td colSpan={13} className="empty">No replies here yet.</td></tr>}
                     {shown.map((g, i) => (
-                      <tr key={g.id}>
+                      <tr key={g.id} className={openId === g.id ? "gcard open" : "gcard"}>
                         <td>{i + 1}</td>
                         <td className="nm">
                           <label className="chk">
@@ -815,7 +936,7 @@ export default function GuestsPage() {
                             <span>{g.name}</span>
                           </label>
                         </td>
-                        <td>
+                        <td data-label="Family / Friend">
                           <select
                                 className={`rel ${g.relation ?? ""} ${g.relation && g.side ? `${g.relation}-${g.side}` : ""}`}
                             value={relValue(g.relation, g.side)}
@@ -826,11 +947,23 @@ export default function GuestsPage() {
                             <RelOptions current={relValue(g.relation, g.side)} />
                           </select>
                         </td>
-                        <td>
+                        <td data-label="Ninang / Ninong">
                           {g.sponsor ? <span className={`rel ${g.sponsor}`}>{g.sponsor === "ninang" ? "Ninang" : "Ninong"}</span> : "–"}
                         </td>
-                        <td><span className={`tag ${g.attending}`}>{g.attending === "yes" ? "Going" : "Can’t make it"}</span></td>
-                        <td className="num">
+                        <td className="stcell">
+                          {g.attending === "yes" && g.present && <span className="tag here">Present</span>}
+                          <span className={`tag ${g.attending}`}>{g.attending === "yes" ? "Going" : "Can’t make it"}</span>
+                          <button
+                            type="button"
+                            className="rowtoggle"
+                            aria-expanded={openId === g.id}
+                            aria-label={`${openId === g.id ? "Hide" : "Show"} details for ${g.name}`}
+                            onClick={() => setOpenId(openId === g.id ? null : g.id)}
+                          >
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+                          </button>
+                        </td>
+                        <td className="num" data-label="People">
                           {g.attending === "yes" ? (
                             <TotalCell
                               key={g.id}
@@ -842,18 +975,30 @@ export default function GuestsPage() {
                             />
                           ) : "–"}
                         </td>
-                        <td>
+                        <td data-label="Adult guest">
                           {g.attending === "yes"
                             ? editingId === g.id
                               ? <AdultsEditor key={g.id} name={g.name} initial={g.adults} onSave={(v) => saveAdultsEdit(g, v)} onCancel={() => setEditingId(null)} />
                               : lines(g.adults)
                             : "–"}
                         </td>
-                        <td>{g.attending === "yes" ? lines(g.kids) : "–"}</td>
-                        <td className="notes">{g.notes || "–"}</td>
-                        <td><NoteCell key={g.id} name={g.name} value={g.adminNote} disabled={locked} onSave={(v) => saveNote(g.id, v)} /></td>
-                        <td className="when">{new Date(g.at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}</td>
-                        <td>
+                        <td data-label="Kids">{g.attending === "yes" ? lines(g.kids) : "–"}</td>
+                        <td className="notes" data-label="Guest’s notes">{g.notes || "–"}</td>
+                        <td data-label="My side notes"><NoteCell key={g.id} name={g.name} value={g.adminNote} disabled={locked} onSave={(v) => saveNote(g.id, v)} /></td>
+                        <td className="when" data-label="Answered">{new Date(g.at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}</td>
+                        <td data-label="At the party">
+                          {g.attending === "yes" && g.present ? (
+                            <MissingCell
+                              key={g.id}
+                              name={g.name}
+                              max={g.count - 1}
+                              missing={g.missing}
+                              note={g.missingNote}
+                              onSave={(n, note) => saveMissing(g.id, n, note)}
+                            />
+                          ) : "–"}
+                        </td>
+                        <td data-label="Actions">
                           <div className="rowact">
                             {g.attending === "yes" && editingId !== g.id && (
                               <button type="button" className="edit-btn" disabled={locked || editingId !== null} onClick={() => setEditingId(g.id)}>Edit</button>
@@ -866,34 +1011,29 @@ export default function GuestsPage() {
                   </tbody>
                   <tfoot>
                     <tr>
-                      <td colSpan={12}>
+                      <td colSpan={13}>
                       <RequiredSponsors guests={guests} locked={locked} />
                       </td>
                     </tr>
                     <tr>
                       <td colSpan={5}>Total people coming (all replies)</td>
                       <td className="num">{headcount}</td>
-                      <td colSpan={6}>of {capacity} spots</td>
-                    </tr>
-                    <tr className="presentrow">
-                      <td colSpan={12}>
-                        Present at the celebration: <b>{presentPeople} people</b> ({presentReplies} of {going.length} replies checked in)
-                      </td>
+                      <td colSpan={7}>of {capacity} spots</td>
                     </tr>
                     <tr>
-                      <td colSpan={12}>
+                      <td colSpan={13}>
                         People coming: Family {byType("family")} · Friends {byType("friend")} · Not set {byType(null)}
                         {" "}| Replies: Family {repliesOf("family")} · Friends {repliesOf("friend")} · Not set {repliesOf(null)}
                       </td>
                     </tr>
                     <tr>
-                      <td colSpan={12}>
+                      <td colSpan={13}>
                         Eman: Family {bySide("family", "eman")} · Friends {bySide("friend", "eman")}
                         {" "}| Gwen: Family {bySide("family", "gwen")} · Friends {bySide("friend", "gwen")}
                       </td>
                     </tr>
                     <tr>
-                      <td colSpan={12}>
+                      <td colSpan={13}>
                         Ninang: {sponsorStats("ninang").yes} coming, {sponsorStats("ninang").no} can’t make it
                         {" "}· Ninong: {sponsorStats("ninong").yes} coming, {sponsorStats("ninong").no} can’t make it
                       </td>

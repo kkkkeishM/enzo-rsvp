@@ -3,7 +3,7 @@ import { timingSafeEqual } from "crypto";
 import { getSupabase } from "@/lib/supabase";
 import { MAX_ATTENDANCE, MAX_NAME_LENGTH } from "@/lib/limits";
 
-const COLUMNS = "id,name,attending,guests,notes,updated_at,adults,kids,invite_code,relation,admin_note,sponsor,side,present";
+const COLUMNS = "id,name,attending,guests,notes,updated_at,adults,kids,invite_code,relation,admin_note,sponsor,side,present,missing,missing_note";
 const LOCK_KEY = "guests_locked";
 
 function safeEqual(input: unknown, expected: string | undefined) {
@@ -32,6 +32,8 @@ function toGuest(r: Record<string, any>) {
     sponsor: (r.sponsor ?? null) as "ninang" | "ninong" | null,
     side: (r.side ?? null) as "eman" | "gwen" | null,
     present: !!r.present,
+    missing: (r.missing ?? 0) as number,
+    missingNote: (r.missing_note ?? "") as string,
   };
 }
 
@@ -171,22 +173,65 @@ export async function DELETE(req: Request) {
 }
 
 export async function PATCH(req: Request) {
-  const { password, id, relation, adminNote, sponsor, count, adults, side, present } = await req.json().catch(() => ({}));
+  const { password, id, relation, adminNote, sponsor, count, adults, side, present, missing, missingNote } =
+    await req.json().catch(() => ({}));
   if (!authorized(password) || typeof id !== "string") {
     return NextResponse.json({ error: "Not allowed" }, { status: 401 });
   }
 
-  // check-in still works while the list is locked; every other edit does not
-  const onlyPresent =
-    present !== undefined &&
+  // day-of changes (check-in and who is missing) still work while the list is locked;
+  // every other edit does not
+  const onlyDayOf =
+    (present !== undefined || missing !== undefined || missingNote !== undefined) &&
     [relation, adminNote, sponsor, count, adults, side].every((v) => v === undefined);
-  if (!onlyPresent && (await isLocked())) return lockedReply();
+  if (!onlyDayOf && (await isLocked())) return lockedReply();
 
   const update: Record<string, unknown> = {};
+
   if (present !== undefined) {
     if (typeof present !== "boolean") return NextResponse.json({ error: "Bad value" }, { status: 400 });
     update.present = present;
+    // un-checking someone clears their "missing" details
+    if (!present) {
+      update.missing = 0;
+      update.missing_note = "";
+    }
   }
+
+  // how many of a checked-in group are not with them, and who
+  if (missing !== undefined || missingNote !== undefined) {
+    let m: number | null = null;
+    if (missing !== undefined) {
+      m = Number(missing);
+      if (!Number.isInteger(m) || m < 0 || m > 98) {
+        return NextResponse.json({ error: "Bad number" }, { status: 400 });
+      }
+    }
+    let mn: string | null = null;
+    if (missingNote !== undefined) {
+      if (typeof missingNote !== "string") return NextResponse.json({ error: "Bad note" }, { status: 400 });
+      mn = missingNote.trim().slice(0, 300);
+    }
+
+    const { data: pr, error: prError } = await getSupabase()
+      .from("rsvps")
+      .select("attending,present,guests")
+      .eq("id", id)
+      .single();
+    if (prError || !pr) return NextResponse.json({ error: "Reply not found" }, { status: 404 });
+    const isPresent = present !== undefined ? present : !!pr.present;
+    if (!pr.attending || !isPresent) {
+      return NextResponse.json({ error: "Check the guest in first" }, { status: 400 });
+    }
+    const most = (pr.guests as number) - 1;
+    if (m !== null && m > most) {
+      return NextResponse.json({ error: `At most ${most} can be missing` }, { status: 400 });
+    }
+    if (m !== null) update.missing = m;
+    if (m === 0) update.missing_note = "";
+    else if (mn !== null) update.missing_note = mn;
+  }
+
   if (relation !== undefined) {
     if (relation !== null && relation !== "" && relation !== "family" && relation !== "friend") {
       return NextResponse.json({ error: "Bad type" }, { status: 400 });

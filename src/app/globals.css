@@ -1991,3 +1991,243 @@ button.cx-info:active{
   overflow-wrap:anywhere;
 }
 .admin .reqbox .reqcol li .reqicon{margin-left:6px}
+
+/* ===== Guest list on phones: one tap-to-open card per guest (no sideways scrolling) =====
+   Paste at the very BOTTOM of globals.css. It replaces the earlier mobile-cards block
+   and overrides the old 1800px "Mobile guest table layout" rules if they are still there. */
+   .rowtoggle{display:none}
+
+   @media (max-width:900px){
+     .admin .table-wrap{
+       width:100%;max-width:100%;
+       overflow-x:visible!important;overflow-y:visible!important;
+       background:none;border:0;box-shadow:none;
+     }
+   
+     /* the table becomes a plain list of cards */
+     .admin .greplies{
+       display:block!important;
+       width:100%!important;min-width:0!important;max-width:100%!important;
+       table-layout:auto!important;
+     }
+     .admin .greplies thead{display:none!important}
+     .admin .greplies tbody,
+     .admin .greplies tfoot{display:block;width:100%;min-width:0}
+   
+     /* collapsed card = one slim row: number, name + check-in box, status, arrow */
+     .admin .greplies tbody tr.gcard,
+     .admin .greplies tbody tr.gcard:nth-child(even){
+       display:grid;
+       grid-template-columns:1.6rem minmax(0,1fr) auto;
+       align-items:center;
+       column-gap:8px;
+       width:100%;
+       margin:0 0 8px;
+       padding:8px 10px;
+       background:#fff;
+       border:3px solid #15161c;
+       border-radius:14px;
+       box-shadow:0 3px 0 #15161c;
+     }
+     .admin .greplies tbody tr.gcard > td{
+       display:none;
+       width:auto!important;min-width:0!important;max-width:none!important;
+       padding:0;border:0;box-sizing:border-box;
+       font-size:.9rem;line-height:1.35;
+     }
+     .admin .greplies tbody tr.gcard > td:nth-child(1){display:block;grid-column:1;grid-row:1;font-size:.8rem;color:#5a5f6b}
+     .admin .greplies tbody tr.gcard > td:nth-child(2){display:block;grid-column:2;grid-row:1}
+     .admin .greplies tbody tr.gcard > td:nth-child(5){
+       display:flex;align-items:center;justify-content:flex-end;gap:8px;
+       grid-column:3;grid-row:1;
+     }
+   
+     .admin .greplies td.nm .chk{display:flex!important;align-items:center;gap:10px;width:100%;min-width:0;white-space:normal!important}
+     .admin .greplies td.nm .chk span{flex:1;min-width:0;overflow-wrap:anywhere}
+   
+     /* the arrow button */
+     .admin .greplies .rowtoggle{
+       display:inline-grid;place-items:center;flex:none;
+       width:30px;height:30px;padding:0;
+       background:#ffc928;border:2px solid #15161c;border-radius:50%;
+       box-shadow:0 2px 0 #15161c;cursor:pointer;
+     }
+     .admin .greplies .rowtoggle svg{
+       width:16px;height:16px;fill:none;stroke:#15161c;stroke-width:3;
+       stroke-linecap:round;stroke-linejoin:round;transition:transform .2s;
+     }
+     .admin .greplies tr.open .rowtoggle svg{transform:rotate(180deg)}
+   
+     /* open card = labelled rows, label on the left, value on the right */
+     .admin .greplies tbody tr.gcard.open > td:not(:nth-child(1)):not(:nth-child(2)):not(:nth-child(5)){
+       display:grid;
+       grid-template-columns:6rem minmax(0,1fr);
+       column-gap:10px;
+       align-items:start;
+       grid-column:1 / -1;
+       padding:7px 0;
+       border-top:1px dashed #d9dce3;
+       text-align:left;
+     }
+     .admin .greplies tbody tr.gcard.open > td:not(:nth-child(1)):not(:nth-child(2)):not(:nth-child(5))::before{
+       content:attr(data-label);
+       font-weight:800;
+       font-size:.7rem;
+       line-height:1.35;
+       letter-spacing:.04em;
+       text-transform:uppercase;
+       color:#5a5f6b;
+       font-style:normal;
+       padding-top:.15em;
+     }
+   
+     /* values */
+     .admin .greplies td .notecell{width:100%;min-width:0!important}
+     .admin .greplies td .notecell textarea,
+     .admin .greplies td .notecell input{width:100%;max-width:100%;min-width:0}
+     .admin .greplies td.num{text-align:left}
+     .admin .greplies td .totalcell input{width:5rem}
+     .admin .greplies td select.rel{width:100%!important;max-width:100%;min-width:0;font-size:.82rem}
+     .admin .greplies td .adulted{min-width:0;width:100%}
+     .admin .greplies td .rowact{display:flex;flex-direction:row;gap:18px}
+     .admin .greplies td.when{white-space:normal;font-size:.85rem}
+     .admin .greplies td.notes{max-width:none;font-style:italic}
+     .admin .greplies td > div{min-width:0;overflow-wrap:anywhere}
+   
+     /* totals and summaries: full-width cards, nothing cut off */
+     .admin .greplies tfoot tr{
+       display:flex;flex-wrap:wrap;gap:2px 8px;
+       width:100%;
+       margin:0 0 8px;padding:10px 12px;
+       background:#fff7d6;border:3px solid #15161c;border-radius:14px;
+       font-size:.85rem;
+     }
+     .admin .greplies tfoot tr:first-child{padding:0;background:none;border:0}
+     .admin .greplies tfoot td{display:block;flex:0 0 auto;width:auto!important;padding:0;border:0;background:none;overflow-wrap:anywhere}
+     .admin .greplies tfoot td[colspan="12"]{flex:1 1 100%}
+     .admin .greplies tfoot tr.presentrow{background:#e4f6e9}
+   }
+
+   @media (max-width:900px){
+    /* every line of a value (kids, adults, buttons) stays in the right-hand column */
+    .admin .greplies tbody tr.gcard.open > td > div{grid-column:2}
+  }
+
+  @media (max-width:900px){
+    /* summary cards at the bottom: ignore the old fixed column widths */
+    .admin .greplies tfoot tr td:nth-child(n){
+      width:auto!important;
+      min-width:0!important;
+      max-width:none!important;
+      text-align:left;
+      overflow-wrap:normal;
+      word-break:normal;
+    }
+    /* the label gets its own full line; the numbers sit together under it */
+    .admin .greplies tfoot tr td:first-child{flex:1 1 100%}
+    .admin .greplies tfoot tr td.num{font-size:1.15rem}
+  }
+
+  @media (max-width:900px){
+    /* toolbar buttons: smaller, and they wrap onto a second line instead of overflowing */
+    .admin .tools{
+      flex-wrap:wrap;
+      width:100%;
+      margin-left:0;
+      gap:6px;
+    }
+    .admin .tools .btn-sm{
+      flex:1 1 auto;
+      white-space:nowrap;
+      font-size:.78rem;
+      padding:.35em .8em;
+      border-width:2px;
+      box-shadow:0 2px 0 #15161c;
+      text-align:center;
+    }
+  
+    /* the All / Going / Can't make it and By reply / Every person tabs, a little smaller too */
+    .admin .tabs button{font-size:.8rem;padding:.35em .85em}
+  }
+
+  /* ===== Present tag, "not with them" and the not-present summary (add at the bottom of globals.css) ===== */
+.tag.here{background:#1d4f91;margin-right:4px}
+
+/* who is missing from a checked-in group */
+.misscell{display:grid;gap:4px;min-width:0}
+.misscell label{display:flex;align-items:center;gap:8px;margin:0;font-weight:700;font-size:.8rem}
+.misscell input[type=number]{width:4rem;font:inherit;font-size:.9rem;color:#15161c;background:#fff;border:2px solid #d9dce3;border-radius:10px;padding:.3em .5em}
+.misscell .missnote{width:100%;font:inherit;font-size:.85rem;color:#15161c;background:#fff;border:2px solid #d9dce3;border-radius:10px;padding:.35em .6em}
+.misscell input:focus-visible{outline:3px solid #1d4f91;outline-offset:2px}
+.misscell small{min-height:1em;font-weight:800;font-size:.75rem;color:#5a5f6b}
+.misscell small.saved{color:#2e9e4f}
+.misscell small.error{color:#c0392b}
+
+/* summary of who is not at the party */
+.admin .gtable tfoot tr.absentrow td{background:#fdebe8;color:#7a1a14;font-weight:700;border-top:3px solid #15161c}
+.notpres summary{cursor:pointer;font-weight:900}
+.notpres p{margin:8px 0 0;font-weight:700}
+.notgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:10px}
+.notgrid h4{margin:0 0 6px;font-size:.9rem}
+.notgrid ul{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.notgrid li{display:flex;flex-wrap:wrap;gap:2px 8px;padding:5px 0;border-bottom:1px dashed #e3b9b3;font-weight:600}
+.notgrid li b{font-weight:800}
+.notgrid li small{flex:1 1 100%;font-weight:600;font-style:italic;color:#5a5f6b}
+
+@media (max-width:900px){
+  .admin .greplies tbody tr.gcard > td:nth-child(5){flex-wrap:wrap}
+  .admin .greplies tbody tr.gcard > td:nth-child(5) .tag.here{margin-right:0}
+  .admin .greplies tfoot td[colspan="13"]{flex:1 1 100%}
+  .admin .greplies tfoot tr.absentrow{background:#fdebe8}
+}
+
+/* ===== Check-in summary card (under the toolbar) ===== */
+.sumcard{margin-bottom:14px;padding:12px;background:#fff;border:3px solid #15161c;border-radius:16px;box-shadow:0 4px 0 #15161c;display:grid;gap:10px}
+.sumrow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.sumbox{padding:8px 6px;text-align:center;background:#f6f7fa;border:2px solid #15161c;border-radius:12px}
+.sumbox b{display:block;font:400 1.5rem/1 var(--display)}
+.sumbox span{font-weight:800;font-size:.72rem;line-height:1.2}
+.sumbox.here{background:#e4f6e9;color:#0f5c3a}
+.sumbox.away{background:#fdebe8;color:#7a1a14}
+.sumbar{height:12px;background:#fdebe8;border:2px solid #15161c;border-radius:999px;overflow:hidden}
+.sumbar i{display:block;height:100%;background:#2f9e6b;transition:width .3s ease}
+.sumcard .notpres{padding:8px 10px;background:#fdebe8;border:2px solid #15161c;border-radius:12px;color:#7a1a14;font-size:.85rem}
+@media (prefers-reduced-motion:reduce){.sumbar i{transition:none}}
+
+/* required guests: pencil sits right after the name, even when the name wraps */
+.admin .reqbox .reqcol li > span:first-child{
+  display:block;
+  flex:1 1 auto;
+  min-width:0;
+  line-height:1.3;
+  overflow-wrap:normal;
+}
+.admin .reqbox .reqcol li .reqlast{
+  white-space:nowrap;      /* last word and pencil never split apart */
+}
+.admin .reqbox .reqcol li .reqicon{
+  margin-left:6px;
+  vertical-align:middle;
+  flex:none;
+}
+.admin .reqbox .reqcol li .reqalias{
+  overflow-wrap:anywhere;
+}
+.admin .reqbox .reqcol li .reqtag{
+  flex:none;
+  margin-left:auto;
+}
+
+@media (max-width:420px){
+  .admin .reqbox .reqcol li{gap:4px}
+  .admin .reqbox .reqcol li .reqtag{font-size:.66rem;padding:2px 6px}
+}
+
+/* title of the check-in summary card */
+.sumtitle{
+  margin:0;
+  padding-bottom:8px;
+  font:400 1.3rem/1.1 var(--display);
+  color:#15161c;
+  border-bottom:2px dashed #d9dce3;
+}
