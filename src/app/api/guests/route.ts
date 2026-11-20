@@ -52,6 +52,15 @@ async function setLocked(on: boolean) {
   return !error;
 }
 
+// The unlock password lives in the database so it is the same on every server
+// (local, Vercel, previews). UNLOCK_PASSWORD is only a fallback if nothing is stored there.
+async function getUnlockPassword(): Promise<string | undefined> {
+  const { data, error } = await getSupabase().from("app_settings").select("value").eq("key", "unlock_password").maybeSingle();
+  if (error) console.error("Unlock password read failed:", error);
+  const stored = typeof data?.value === "string" ? data.value : "";
+  return stored || process.env.UNLOCK_PASSWORD || undefined;
+}
+
 const lockedReply = () => NextResponse.json({ error: "Locked", locked: true }, { status: 423 });
 
 const cleanName = (x: unknown) =>
@@ -71,10 +80,14 @@ export async function POST(req: Request) {
 
   if (action === "unlock") {
     // a separate password that only the admin knows
-    if (!process.env.UNLOCK_PASSWORD) {
-      return NextResponse.json({ error: "Unlock password isn’t set on the server" }, { status: 500 });
+    const expected = await getUnlockPassword();
+    if (!expected) {
+      return NextResponse.json(
+        { error: "No unlock password is set yet. The admin needs to add one (see unlock-password.sql)." },
+        { status: 500 }
+      );
     }
-    if (!safeEqual(unlockPassword, process.env.UNLOCK_PASSWORD)) {
+    if (!safeEqual(unlockPassword, expected)) {
       return NextResponse.json({ error: "Wrong unlock password" }, { status: 403 });
     }
     if (!(await setLocked(false))) return NextResponse.json({ error: "Could not unlock" }, { status: 500 });
@@ -173,7 +186,7 @@ export async function DELETE(req: Request) {
 }
 
 export async function PATCH(req: Request) {
-  const { password, id, relation, adminNote, sponsor, count, adults, side, present, missing, missingNote } =
+  const { password, id, name, relation, adminNote, sponsor, count, adults, side, present, missing, missingNote } =
     await req.json().catch(() => ({}));
   if (!authorized(password) || typeof id !== "string") {
     return NextResponse.json({ error: "Not allowed" }, { status: 401 });
@@ -183,10 +196,21 @@ export async function PATCH(req: Request) {
   // every other edit does not
   const onlyDayOf =
     (present !== undefined || missing !== undefined || missingNote !== undefined) &&
-    [relation, adminNote, sponsor, count, adults, side].every((v) => v === undefined);
+    [name, relation, adminNote, sponsor, count, adults, side].every((v) => v === undefined);
   if (!onlyDayOf && (await isLocked())) return lockedReply();
 
   const update: Record<string, unknown> = {};
+
+  // rename the guest who answered
+  if (name !== undefined) {
+    const newName = cleanName(name);
+    if (!newName) return NextResponse.json({ error: "Name can’t be empty" }, { status: 400 });
+    const { data: nr, error: nrError } = await getSupabase().from("rsvps").select("invite_code").eq("id", id).single();
+    if (nrError || !nr) return NextResponse.json({ error: "Reply not found" }, { status: 404 });
+    update.name = newName;
+    // guests without an invite code are matched by this key, so keep it in step with the name
+    if (!nr.invite_code) update.name_key = newName.toLowerCase().replace(/\s+/g, " ");
+  }
 
   if (present !== undefined) {
     if (typeof present !== "boolean") return NextResponse.json({ error: "Bad value" }, { status: 400 });
@@ -296,6 +320,11 @@ export async function PATCH(req: Request) {
   if (Object.keys(update).length === 0) return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
 
   const { error } = await getSupabase().from("rsvps").update(update).eq("id", id);
-  if (error) return NextResponse.json({ error: "Could not save" }, { status: 500 });
+  if (error) {
+    if (error.code === "23505") {
+      return NextResponse.json({ error: "A reply with that name already exists" }, { status: 409 });
+    }
+    return NextResponse.json({ error: "Could not save" }, { status: 500 });
+  }
   return NextResponse.json({ ok: true });
 }

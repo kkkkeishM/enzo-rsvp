@@ -2214,7 +2214,7 @@ button.cx-info:active{
   overflow-wrap:anywhere;
 }
 .admin .reqbox .reqcol li .reqtag{
-  flex:none;
+  flex:ne;
   margin-left:auto;
 }
 
@@ -2230,4 +2230,103 @@ button.cx-info:active{
   font:400 1.3rem/1.1 var(--display);
   color:#15161c;
   border-bottom:2px dashed #d9dce3;
+}
+
+/* ===== Track my guests panel + name editing (add at the bottom of globals.css) ===== */
+.trackbox{margin-bottom:14px;padding:16px;background:#fff;border:3px solid #15161c;border-radius:16px;box-shadow:0 4px 0 #15161c}
+.trackbox h2{margin:0 0 12px;padding-bottom:10px;font:400 1.3rem/1.1 var(--display);border-bottom:2px dashed #d9dce3}
+.trackstats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.tstat{padding:10px;text-align:center;background:#f6f7fa;border:2px solid #15161c;border-radius:14px}
+.tstat b{display:block;font:400 1.6rem/1.1 var(--display)}
+.tstat span{font-weight:800;font-size:.75rem}
+.tstat.here{background:#e4f6e9}
+.tstat.here b{color:#0f5c3a}
+.tstat.away{background:#fdebe8}
+.tstat.away b{color:#7a1a14}
+.trackbar{height:14px;margin-bottom:12px;background:#fff;border:2px solid #15161c;border-radius:999px;overflow:hidden}
+.trackbar i{display:block;height:100%;background:#2f9e6b;transition:width .3s}
+.trackbox .notpres{padding:10px 12px;background:#fdebe8;border:2px solid #7a1a14;border-radius:12px;color:#7a1a14;font-weight:700}
+@media (max-width:520px){.tstat b{font-size:1.25rem}.tstat span{font-size:.68rem}}
+
+/* name input shown when Edit is pressed */
+.nameedit{display:block;width:100%;margin-top:6px;font:inherit;font-weight:800;font-size:.9rem;color:#15161c;background:#fff;border:2px solid #1d4f91;border-radius:10px;padding:.35em .6em}
+.nameedit:focus-visible{outline:3px solid #1d4f91;outline-offset:2px}
+.admin td.nm .acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.admin td.nm .acts .btn-sm{font-size:.85rem;padding:.3em .9em}
+.admin td.nm .err{min-height:0;font-size:.8rem}
+
+
+/* ===== Track my guests panel + name editing (add at the bottom of globals.css) ===== */
+.trackbox{margin-bottom:14px;padding:16px;background:#fff;border:3px solid #15161c;border-radius:16px;box-shadow:0 4px 0 #15161c}
+.trackbox h2{margin:0 0 12px;padding-bottom:10px;font:400 1.3rem/1.1 var(--display);border-bottom:2px dashed #d9dce3}
+.trackstats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.tstat{padding:10px;text-align:center;background:#f6f7fa;border:2px solid #15161c;border-radius:14px}
+.tstat b{display:block;font:400 1.6rem/1.1 var(--display)}
+.tstat span{font-weight:800;font-size:.75rem}
+.tstat.here{background:#e4f6e9}
+.tstat.here b{color:#0f5c3a}
+.tstat.away{background:#fdebe8}
+.tstat.away b{color:#7a1a14}
+.trackbar{height:14px;margin-bottom:12px;background:#fff;border:2px solid #15161c;border-radius:999px;overflow:hidden}
+.trackbar i{display:block;height:100%;background:#2f9e6b;transition:width .3s}
+.trackbox .notpres{padding:10px 12px;background:#fdebe8;border:2px solid #7a1a14;border-radius:12px;color:#7a1a14;font-weight:700}
+@media (max-width:520px){.tstat b{font-size:1.25rem}.tstat span{font-size:.68rem}}
+
+/* name input shown when Edit is pressed */
+.nameedit{display:block;width:100%;margin-top:6px;font:inherit;font-weight:800;font-size:.9rem;color:#15161c;background:#fff;border:2px solid #1d4f91;border-radius:10px;padding:.35em .6em}
+.nameedit:focus-visible{outline:3px solid #1d4f91;outline-offset:2px}
+.admin td.nm .acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.admin td.nm .acts .btn-sm{font-size:.85rem;padding:.3em .9em}
+.admin td.nm .err{min-height:0;font-size:.8rem}
+
+/* ===== Search bar ===== */
+.searchbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-bottom:12px}
+.searchbox{position:relative;flex:1 1 260px;min-width:0}
+.searchbox input{width:100%;font:inherit;font-weight:700;color:#15161c;background:#fff;border:3px solid #15161c;border-radius:999px;box-shadow:0 3px 0 #15161c;padding:.55em 2.4em .55em 1em;-webkit-appearance:none;appearance:none}
+.searchbox input::placeholder{color:#8a8f9c;font-weight:600}
+.searchbox input:focus-visible{outline:3px solid #1d4f91;outline-offset:2px}
+.searchbox input::-webkit-search-cancel-button{display:none}
+.searchclear{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:26px;height:26px;padding:0;display:grid;place-items:center;font:800 .8rem/1 var(--body);color:#fff;background:#15161c;border:0;border-radius:50%;cursor:pointer}
+.searchcount{font-weight:800;font-size:.85rem;color:#5a5f6b;white-space:nowrap}
+@media (max-width:520px){.searchcount{flex:1 1 100%}}
+
+/* ===== Track my guests panel + name editing (add at the bottom of globals.css) ===== */
+.trackbox{margin-bottom:14px;padding:16px;background:#fff;border:3px solid #15161c;border-radius:16px;box-shadow:0 4px 0 #15161c}
+.trackbox h2{margin:0 0 12px;padding-bottom:10px;font:400 1.3rem/1.1 var(--display);border-bottom:2px dashed #d9dce3}
+.trackstats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.tstat{padding:10px;text-align:center;background:#f6f7fa;border:2px solid #15161c;border-radius:14px}
+.tstat b{display:block;font:400 1.6rem/1.1 var(--display)}
+.tstat span{font-weight:800;font-size:.75rem}
+.tstat.here{background:#e4f6e9}
+.tstat.here b{color:#0f5c3a}
+.tstat.away{background:#fdebe8}
+.tstat.away b{color:#7a1a14}
+.trackbar{height:14px;margin-bottom:12px;background:#fff;border:2px solid #15161c;border-radius:999px;overflow:hidden}
+.trackbar i{display:block;height:100%;background:#2f9e6b;transition:width .3s}
+.trackbox .notpres{padding:10px 12px;background:#fdebe8;border:2px solid #7a1a14;border-radius:12px;color:#7a1a14;font-weight:700}
+@media (max-width:520px){.tstat b{font-size:1.25rem}.tstat span{font-size:.68rem}}
+
+/* name input shown when Edit is pressed */
+.nameedit{display:block;width:100%;margin-top:6px;font:inherit;font-weight:800;font-size:.9rem;color:#15161c;background:#fff;border:2px solid #1d4f91;border-radius:10px;padding:.35em .6em}
+.nameedit:focus-visible{outline:3px solid #1d4f91;outline-offset:2px}
+.admin td.nm .acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.admin td.nm .acts .btn-sm{font-size:.85rem;padding:.3em .9em}
+.admin td.nm .err{min-height:0;font-size:.8rem}
+
+/* ===== Search bar ===== */
+.searchbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-bottom:12px}
+.searchbox{position:relative;flex:1 1 260px;min-width:0}
+.searchbox input{width:100%;font:inherit;font-weight:700;color:#15161c;background:#fff;border:3px solid #15161c;border-radius:999px;box-shadow:0 3px 0 #15161c;padding:.55em 2.4em .55em 1em;-webkit-appearance:none;appearance:none}
+.searchbox input::placeholder{color:#8a8f9c;font-weight:600}
+.searchbox input:focus-visible{outline:3px solid #1d4f91;outline-offset:2px}
+.searchbox input::-webkit-search-cancel-button{display:none}
+.searchclear{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:26px;height:26px;padding:0;display:grid;place-items:center;font:800 .8rem/1 var(--body);color:#fff;background:#15161c;border:0;border-radius:50%;cursor:pointer}
+.searchcount{font-weight:800;font-size:.85rem;color:#5a5f6b;white-space:nowrap}
+@media (max-width:520px){.searchcount{flex:1 1 100%}}
+
+/* ===== five summary cards (kids going added) ===== */
+.stats{grid-template-columns:repeat(5,1fr)}
+@media (max-width:900px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .stats .stat:nth-child(5){grid-column:1 / -1}   /* the odd card fills the last row */
 }
