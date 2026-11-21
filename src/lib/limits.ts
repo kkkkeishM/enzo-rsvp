@@ -1,5 +1,5 @@
 // Keep these in sync with supabase/rsvp-guest-limits.sql (the database enforces them).
-export const MAX_ATTENDANCE = 90;
+export const MAX_ATTENDANCE = 95;
 export const MAX_NAME_LENGTH = 80;
 
 // Kids: never more than MAX_KIDS per RSVP, each aged MIN_CHILD_AGE to MAX_CHILD_AGE.

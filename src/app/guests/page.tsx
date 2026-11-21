@@ -410,49 +410,84 @@ const REQUIRED_NINONG = [
   "Jasper Salandanan", "John Melvin Bozar", "Jorge Luis Reyes",
 ];
 
-const norm = (s: string) => s.toLowerCase().replace(/\s+/g, " ").trim();
+// compare names ignoring capitals, accents, punctuation and extra spaces
+const norm = (s: string) =>
+  s
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[\u200b-\u200d\ufeff]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+const words = (s: string) => norm(s).split(" ").filter(Boolean);
 
-const ALIAS_KEY = "required-aliases";
+// two names match when every word of the shorter one is in the longer one (needs 2+ words)
+const sameWords = (a: string, b: string) => {
+  const wa = words(a);
+  const wb = words(b);
+  const [short, long] = wa.length <= wb.length ? [wa, wb] : [wb, wa];
+  return short.length >= 2 && short.every((w) => long.includes(w));
+};
 
-function RequiredSponsors({ guests, locked }: { guests: Guest[]; locked: boolean }) {
-  const [aliases, setAliases] = useState<Record<string, string>>({});
+const OLD_ALIAS_KEY = "required-aliases"; // nicknames used to be saved in this browser only
+
+function RequiredSponsors({ guests, locked, links, onLink }: {
+  guests: Guest[];
+  locked: boolean;
+  links: Record<string, string>;
+  onLink: (requiredName: string, guestId: string | null) => Promise<string | null>;
+}) {
   const [editing, setEditing] = useState<string | null>(null);
-  const [draft, setDraft] = useState("");
+  const [draft, setDraft] = useState(""); // id of the reply picked in the list ("" = match by name)
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState("");
+  const migrated = useRef(false);
 
-  // load saved nicknames (this browser only)
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(ALIAS_KEY);
-      if (raw) setAliases(JSON.parse(raw));
-    } catch {}
-  }, []);
-
-  // NEW: close any open editor the moment the list gets locked
+  // close any open editor the moment the list gets locked
   useEffect(() => {
     if (locked) setEditing(null);
   }, [locked]);
 
-  function saveAlias(orig: string, value: string) {
-    if (locked) return; // NEW
-    const v = value.trim().replace(/\s+/g, " ");
-    const next = { ...aliases };
-    if (!v || norm(v) === norm(orig)) delete next[orig];
-    else next[orig] = v;
-    setAliases(next);
-    try { localStorage.setItem(ALIAS_KEY, JSON.stringify(next)); } catch {}
-    setEditing(null);
+  const sorted = useMemo(() => [...guests].sort((a, b) => a.name.localeCompare(b.name)), [guests]);
+
+  // one-time move of nicknames saved in this browser into the shared list
+  useEffect(() => {
+    if (migrated.current || locked || guests.length === 0) return;
+    migrated.current = true;
+    let old: Record<string, string> = {};
+    try { old = JSON.parse(localStorage.getItem(OLD_ALIAS_KEY) || "{}"); } catch { return; }
+    const entries = Object.entries(old).filter(([orig]) => !links[orig]);
+    if (entries.length === 0) {
+      try { localStorage.removeItem(OLD_ALIAS_KEY); } catch {}
+      return;
+    }
+    (async () => {
+      for (const [orig, alias] of entries) {
+        const g = guests.find((x) => norm(x.name) === norm(alias)) ?? guests.find((x) => sameWords(x.name, alias));
+        if (g) await onLink(orig, g.id);
+      }
+      try { localStorage.removeItem(OLD_ALIAS_KEY); } catch {}
+    })();
+  }, [guests, locked, links, onLink]);
+
+  async function save(orig: string) {
+    if (locked || saving) return;
+    setSaving(true);
+    setErr("");
+    const msg = await onLink(orig, draft || null);
+    setSaving(false);
+    if (msg) setErr(msg);
+    else setEditing(null);
   }
 
-  // match using the nickname if one was set, otherwise the original name
+  // the reply linked to this required guest, otherwise one whose name matches
   const find = (name: string) => {
-    const n = norm(aliases[name] ?? name);
-    return (
-      guests.find((g) => norm(g.name) === n) ??
-      guests.find((g) => {
-        const m = norm(g.name);
-        return m.length >= 4 && (m.includes(n) || n.includes(m));
-      })
-    );
+    const linkedId = links[name];
+    const linked = linkedId ? guests.find((g) => g.id === linkedId) : undefined;
+    if (linked) return linked;
+    const n = norm(name);
+    return guests.find((g) => norm(g.name) === n) ?? guests.find((g) => sameWords(g.name, name));
   };
 
   const status = (name: string) => {
@@ -464,7 +499,7 @@ function RequiredSponsors({ guests, locked }: { guests: Guest[]; locked: boolean
   };
 
   const group = (title: string, names: string[]) => {
-    const rows = names.map((n) => ({ n, s: status(n) }));
+    const rows = names.map((n) => ({ n, s: status(n), g: find(n) }));
     const going = rows.filter((r) => r.s.key === "yes").length;
     return (
       <div className="reqcol">
@@ -474,35 +509,33 @@ function RequiredSponsors({ guests, locked }: { guests: Guest[]; locked: boolean
             <li key={r.n}>
               {editing === r.n ? (
                 <span className="reqedit">
-                  <input
-                    type="text"
-                    list="reply-names"
+                  <select
                     value={draft}
                     autoFocus
-                    maxLength={80}
-                    placeholder="Name used in the RSVP"
-                    aria-label={`Name used in the RSVP for ${r.n}`}
+                    aria-label={`Which reply is ${r.n}?`}
                     onChange={(e) => setDraft(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") { e.preventDefault(); saveAlias(r.n, draft); }
-                      if (e.key === "Escape") setEditing(null);
-                    }}
-                  />
-                  <button type="button" className="reqbtn save" onClick={() => saveAlias(r.n, draft)}>Save</button>
-                  <button type="button" className="reqbtn" onClick={() => setEditing(null)}>Cancel</button>
+                  >
+                    <option value="">Match by name automatically</option>
+                    {sorted.map((g) => (
+                      <option key={g.id} value={g.id}>{g.name}{g.attending === "no" ? " (can’t make it)" : ""}</option>
+                    ))}
+                  </select>
+                  <button type="button" className="reqbtn save" disabled={saving} onClick={() => save(r.n)}>{saving ? "Saving..." : "Save"}</button>
+                  <button type="button" className="reqbtn" disabled={saving} onClick={() => setEditing(null)}>Cancel</button>
+                  {err && <small className="reqerr" role="alert">{err}</small>}
                 </span>
               ) : (
                 <>
                   <span>
                     {r.n}
-                    {aliases[r.n] && <small className="reqalias"> → {aliases[r.n]}</small>}
+                    {links[r.n] && r.g && norm(r.g.name) !== norm(r.n) && <small className="reqalias"> → {r.g.name}</small>}
                     <button
                       type="button"
                       className="reqicon"
                       disabled={locked}
-                      title={locked ? "Locked" : "Edit name"}
-                      aria-label={`Edit the RSVP name for ${r.n}`}
-                      onClick={() => { setEditing(r.n); setDraft(aliases[r.n] ?? r.n); }}
+                      title={locked ? "Locked" : "Link to a reply"}
+                      aria-label={`Pick the reply that belongs to ${r.n}`}
+                      onClick={() => { setEditing(r.n); setDraft(links[r.n] ?? ""); setErr(""); }}
                     >
                       <svg viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M12 20h9" />
@@ -524,17 +557,12 @@ function RequiredSponsors({ guests, locked }: { guests: Guest[]; locked: boolean
     <details className="reqbox">
       <summary>Required guests on Enzo’s christening</summary>
 
-      {/* suggestions: pick the exact name from your replies */}
-      <datalist id="reply-names">
-        {guests.map((g) => <option key={g.id} value={g.name} />)}
-      </datalist>
-
       <div className="reqgrid">
         {group("Ninang", REQUIRED_NINANG)}
         {group("Ninong", REQUIRED_NINONG)}
       </div>
       <p className="reqhint">
-        “No reply yet” can also mean the guest used a nickname. Tap Edit and type the name they used in the RSVP.
+        “No reply yet” can also mean the guest used a different name. Tap the pencil and pick their reply from the list. The link is saved for everyone, on every device.
       </p>
     </details>
   );
@@ -543,7 +571,7 @@ function RequiredSponsors({ guests, locked }: { guests: Guest[]; locked: boolean
 export default function GuestsPage() {
   const [password, setPassword] = useState("");
   const [guests, setGuests] = useState<Guest[] | null>(null);
-  const [capacity, setCapacity] = useState(90);
+  const [capacity, setCapacity] = useState(95);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(false);
@@ -560,6 +588,7 @@ export default function GuestsPage() {
   const [nameDraft, setNameDraft] = useState("");
   const [nameErr, setNameErr] = useState("");
   const [openId, setOpenId] = useState<string | null>(null); // which guest card is expanded on phones
+  const [requiredLinks, setRequiredLinks] = useState<Record<string, string>>({});
   const lockedHit = useRef(false);
 
   const LOCKED_MSG = "The guest list is locked. Contact the admin to unlock it.";
@@ -595,6 +624,7 @@ export default function GuestsPage() {
     const data = await res.json();
     setGuests(data.guests);
     setLocked(!!data.locked);
+    setRequiredLinks(data.requiredLinks ?? {});
     if (data.capacity) setCapacity(data.capacity);
   }
 
@@ -650,6 +680,20 @@ export default function GuestsPage() {
       return data.detail ? `${base} (${data.detail})` : base;
     }
     setGuests((gs) => [data.guest as Guest, ...(gs ?? [])]); // cards update from this list
+    return null;
+  }
+
+  // link a required Ninang / Ninong to the reply that belongs to them (saved for everyone)
+  async function linkRequired(requiredName: string, guestId: string | null): Promise<string | null> {
+    const res = await fetch("/api/guests", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password, action: "set_link", requiredName, guestId }),
+    });
+    if (lockedResponse(res)) return LOCKED_MSG;
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) return data.error ?? "Couldn’t save the link.";
+    setRequiredLinks(data.links ?? {});
     return null;
   }
 
@@ -1084,7 +1128,7 @@ export default function GuestsPage() {
                   <tfoot>
                     <tr>
                       <td colSpan={13}>
-                      <RequiredSponsors guests={guests} locked={locked} />
+                      <RequiredSponsors guests={guests} locked={locked} links={requiredLinks} onLink={linkRequired} />
                       </td>
                     </tr>
                     <tr>

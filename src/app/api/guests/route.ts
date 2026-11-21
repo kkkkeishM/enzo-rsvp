@@ -5,6 +5,7 @@ import { MAX_ATTENDANCE, MAX_NAME_LENGTH } from "@/lib/limits";
 
 const COLUMNS = "id,name,attending,guests,notes,updated_at,adults,kids,invite_code,relation,admin_note,sponsor,side,present,missing,missing_note";
 const LOCK_KEY = "guests_locked";
+const LINKS_KEY = "required_links";
 
 function safeEqual(input: unknown, expected: string | undefined) {
   if (!expected || typeof input !== "string") return false;
@@ -61,6 +62,21 @@ async function getUnlockPassword(): Promise<string | undefined> {
   return stored || process.env.UNLOCK_PASSWORD || undefined;
 }
 
+// which reply belongs to each required Ninang / Ninong (shared by every server and device)
+async function getLinks(): Promise<Record<string, string>> {
+  const { data, error } = await getSupabase().from("app_settings").select("value").eq("key", LINKS_KEY).maybeSingle();
+  if (error) {
+    console.error("Links read failed:", error);
+    return {};
+  }
+  try {
+    const parsed = JSON.parse(typeof data?.value === "string" ? data.value : "{}");
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? (parsed as Record<string, string>) : {};
+  } catch {
+    return {};
+  }
+}
+
 const lockedReply = () => NextResponse.json({ error: "Locked", locked: true }, { status: 423 });
 
 const cleanName = (x: unknown) =>
@@ -70,7 +86,7 @@ const cleanNames = (v: unknown) =>
 
 // load the list, or lock / unlock it
 export async function POST(req: Request) {
-  const { password, action, unlockPassword } = await req.json().catch(() => ({}));
+  const { password, action, unlockPassword, requiredName, guestId } = await req.json().catch(() => ({}));
   if (!authorized(password)) return NextResponse.json({ error: "Wrong password" }, { status: 401 });
 
   if (action === "lock") {
@@ -94,6 +110,29 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, locked: false });
   }
 
+  if (action === "set_link") {
+    if (await isLocked()) return lockedReply();
+    const key = cleanName(requiredName);
+    if (!key) return NextResponse.json({ error: "Bad name" }, { status: 400 });
+    if (guestId !== null && guestId !== undefined && typeof guestId !== "string") {
+      return NextResponse.json({ error: "Bad reply" }, { status: 400 });
+    }
+    if (guestId) {
+      const { data: found } = await getSupabase().from("rsvps").select("id").eq("id", guestId).maybeSingle();
+      if (!found) return NextResponse.json({ error: "Reply not found" }, { status: 404 });
+    }
+    const links = await getLinks();
+    if (guestId) links[key] = guestId;
+    else delete links[key];
+    if (Object.keys(links).length > 200) return NextResponse.json({ error: "Too many links" }, { status: 400 });
+    const { error } = await getSupabase().from("app_settings").upsert({ key: LINKS_KEY, value: JSON.stringify(links) });
+    if (error) {
+      console.error("Links write failed:", error);
+      return NextResponse.json({ error: "Could not save the link" }, { status: 500 });
+    }
+    return NextResponse.json({ ok: true, links });
+  }
+
   try {
     const { data, error } = await getSupabase().from("rsvps").select(COLUMNS).order("updated_at", { ascending: false });
     if (error) throw error;
@@ -101,6 +140,7 @@ export async function POST(req: Request) {
       guests: (data ?? []).map(toGuest),
       capacity: MAX_ATTENDANCE,
       locked: await isLocked(),
+      requiredLinks: await getLinks(),
     });
   } catch (e) {
     console.error("Guest list failed:", e);
